@@ -1,77 +1,102 @@
-# React + TypeScript + Vite
+# E-commerce Adminka (frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+`e-commerse` (NestJS + Prisma + MongoDB) backendi uchun admin panel.
 
-Currently, two official plugins are available:
+- **Stack:** React 19 · TypeScript · Vite 8 · Tailwind CSS v4 · [`dgz-ui-shared`](https://www.npmjs.com/package/dgz-ui-shared) · TanStack Query · React Router · react-hook-form + zod · i18next
+- **Backend:** `http://localhost:3000` · Swagger: `http://localhost:3000/api/docs`
+- **API shartnomasi:** [`../e-commerse/docs/admin-frontend.md`](../e-commerse/docs/admin-frontend.md) — yagona haqiqat manbai.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Ishga tushirish
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+### 1. Backend
 
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+cd ../e-commerse && npm run start:dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Admin hisobi faqat seed orqali yaratiladi (API'da `role` maydonini o'zgartirish imkoni yo'q):
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+cd ../e-commerse && npx prisma db seed
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Seed hisobi: `admin@gmail.com` / `password`.
+
+### 2. Frontend
+
+```bash
+npm install
+```
+
+`.env` faylini yarating (`.env.example` dan nusxa oling):
 
 ```
+VITE_API_URL=http://localhost:3000
+```
+
+```bash
+npm run dev
+```
+
+Adminka `http://localhost:5173` da ochiladi. Backend'da `app.enableCors()` yoqilgan, proxy kerak emas.
+
+---
+
+## Skriptlar
+
+| Buyruq | Vazifasi |
+|---|---|
+| `npm run dev` | Vite dev server (HMR) |
+| `npm run build` | `tsc -b` + production build |
+| `npm run preview` | Build natijasini ko'rish |
+| `npm run lint` | ESLint |
+
+---
+
+## Papka tuzilishi
+
+```
+src/
+  app/            # Router, providers (QueryClient, Theme, i18n), root App
+  components/
+    layout/       # AdminLayout, Sidebar, Header, PageHeader
+    ui/           # Loyihaga xos umumiy komponentlar (dgz-ui ustiga qurilgan)
+  features/       # Har bir modul o'z papkasida: api, hooks, components, pages
+    auth/
+    profile/
+    dashboard/
+  i18n/           # i18next init + locales/{uz,ru,en}.json
+  lib/            # api.ts (axios instance), types.ts, utils
+  index.css       # Tailwind + dgz-ui-shared styles + @theme token ko'prigi
+```
+
+Feature papkasi ichidagi tartib:
+
+```
+features/<modul>/
+  api.ts          # faqat HTTP chaqiruvlar
+  hooks.ts        # TanStack Query hooklari
+  components/     # shu modulga xos komponentlar
+  pages/          # marshrutga ulanadigan sahifalar
+  types.ts        # modulga xos tiplar (umumiylari lib/types.ts da)
+```
+
+---
+
+## Muhim eslatmalar
+
+Batafsil qoidalar — [`.claude/rules/`](.claude/rules/) va [`AGENTS.md`](AGENTS.md) da. Eng kritiklari:
+
+1. **Har bir API so'roviga `ln=en` qo'shiladi.** Backend `name`/`description` maydonlarini tarjima qiladi; `ln` yubormasangiz tahrirlash formasiga tarjima qilingan matn tushadi va saqlaganda bazadagi asl nom buziladi. Bu `lib/api.ts` interceptorida markazlashgan — qo'lda `axios` ishlatmang.
+2. **UI tili ≠ API tili.** Interfeys uz/ru/en bo'la oladi, lekin API so'rovlari **doim** `ln=en` bilan ketadi.
+3. **`all=false` yubormang** (mahsulotlarda) — backend bug'i tufayli `true` kabi ishlaydi. Kerak bo'lmasa parametrni umuman qo'shmang.
+4. **`DELETE` — haqiqiy o'chirish.** Odatiy holatda `PATCH { is_archived: true }` ishlating.
+5. **Access token 15 daqiqa.** Avtomatik refresh `lib/api.ts` da.
+
+---
+
+## Loyiha holati
+
+Bajarilgan va rejadagi ishlar — [`docs/BACKLOG.md`](docs/BACKLOG.md).
