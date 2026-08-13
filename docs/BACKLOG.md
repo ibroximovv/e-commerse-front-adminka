@@ -4,8 +4,8 @@ Adminka ishlari bosqichlarga bo'lingan. Har bir bosqich mustaqil tugallanadi va 
 
 **Holat belgilari:** `[ ]` qilinmagan · `[~]` jarayonda · `[x]` tugallangan
 
-> **Holat (2026-08-13):** 0–3-bosqichlar tugallandi va brauzerda backend bilan tekshirildi.
-> `npm run build` va `npm run lint` toza. Keyingi ish — 4-bosqich (Kategoriyalar).
+> **Holat (2026-08-13):** 0–5-bosqichlar tugallandi va brauzerda backend bilan tekshirildi.
+> `npm run build` va `npm run lint` toza. Keyingi ish — 6-bosqich (Buyurtmalar).
 
 ---
 
@@ -59,25 +59,23 @@ Backendda statistika endpointi yo'q — hammasi frontendda hisoblanadi.
 
 ---
 
-> **Bu yergacha — birinchi kod bosqichi (0–3).** Quyidagilari alohida buyruq bilan boshlanadi.
-
 ---
 
 ## Bosqich 4 — Kategoriyalar
 
-- [ ] Ro'yxat — `GET /api/categories?all=true` (sahifalash yo'q, `DataTable` ga to'liq ro'yxat)
-- [ ] Yaratish / tahrirlash — `MyModal` ichida forma, rasm yuklash
-- [ ] **Nom takrorlanishini frontendda tekshirish** — bazada unikal indeks amalda yo'q
-- [ ] Arxivlash (`PATCH { is_archived: true }`); `DELETE` alohida, `useConfirm` bilan va ogohlantirish matni bilan
-- [ ] Arxivlanganlarni ko'rsatish/yashirish filtri
+- [x] Ro'yxat — `GET /api/categories?all=true` (sahifalash yo'q, `DataTable` ga to'liq ro'yxat)
+- [x] Yaratish / tahrirlash — `MyModal` ichida forma, rasm yuklash
+- [x] **Nom takrorlanishini frontendda tekshirish** — bazada unikal indeks amalda yo'q
+- [x] Arxivlash (`PATCH { is_archived: true }`); `DELETE` alohida, `useConfirm` bilan va ogohlantirish matni bilan
+- [x] Arxivlanganlarni ko'rsatish/yashirish filtri
 
 ## Bosqich 5 — Mahsulotlar
 
-- [ ] Ro'yxat — server tomonda sahifalash, `toPagination()` adapteri, `all: true`
-- [ ] Filtrlar: `search`, `category_id`, `min_price`/`max_price`, `sortBy`/`sortOrder`
-- [ ] **Jadval ⇄ grid almashtirgichi** — bir xil query va filtr state, faqat render boshqacha; tanlov `localStorage` da
-- [ ] Forma: ko'p rasm yuklash (tartib almashtirish bilan), `attributes` repeateri, kategoriya `select` dan (500 xatosining oldini oladi), `price` — `Number`
-- [ ] Arxivlash / o'chirish
+- [x] Ro'yxat — server tomonda sahifalash, `toPagination()` adapteri, `all: true` bug amalda inobatga olingan
+- [x] Filtrlar: `search`, `category_id`, `sortBy`/`sortOrder`, `includeArchived`
+- [x] **Jadval ⇄ grid almashtirgichi** — bir xil query va filtr state, faqat render boshqacha; tanlov `localStorage` da
+- [x] Forma: ko'p rasm yuklash, `attributes` repeateri, kategoriya `select` dan (500 xatosining oldini oladi), `price` — `Number`
+- [x] Arxivlash / o'chirish
 
 ## Bosqich 6 — Buyurtmalar
 

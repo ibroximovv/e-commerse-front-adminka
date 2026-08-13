@@ -17,8 +17,8 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', labelKey: 'nav.dashboard', icon: LayoutDashboard },
-  { to: '/products', labelKey: 'nav.products', icon: Package, disabled: true },
-  { to: '/categories', labelKey: 'nav.categories', icon: Tags, disabled: true },
+  { to: '/products', labelKey: 'nav.products', icon: Package },
+  { to: '/categories', labelKey: 'nav.categories', icon: Tags },
   { to: '/orders', labelKey: 'nav.orders', icon: ShoppingCart, disabled: true },
   { to: '/users', labelKey: 'nav.users', icon: Users, disabled: true },
 ]

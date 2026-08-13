@@ -14,6 +14,31 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cn('skeleton-shimmer rounded-md', className)} />
 }
 
+export function TableSkeleton({
+  rows = 5,
+  columns = 4,
+}: {
+  rows?: number
+  columns?: number
+}) {
+  return (
+    <div className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <div className="flex gap-4">
+        {Array.from({ length: columns }).map((_, i) => (
+          <Skeleton key={i} className="h-6 flex-1" />
+        ))}
+      </div>
+      {Array.from({ length: rows }).map((_, r) => (
+        <div key={r} className="flex gap-4">
+          {Array.from({ length: columns }).map((_, c) => (
+            <Skeleton key={c} className="h-10 flex-1" />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function EmptyState({
   title,
   description,

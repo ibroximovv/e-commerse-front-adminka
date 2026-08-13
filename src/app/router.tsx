@@ -6,7 +6,9 @@ import { AdminLayout } from '@/components/layout/AdminLayout'
 import { NotFoundPage } from '@/components/ui/ErrorPage'
 import { GuestRoute, ProtectedRoute } from '@/features/auth/ProtectedRoute'
 import { LoginPage } from '@/features/auth/LoginPage'
+import { CategoriesPage } from '@/features/categories/pages/CategoriesPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { ProductsPage } from '@/features/products/pages/ProductsPage'
 import { ProfilePage } from '@/features/profile/ProfilePage'
 import { setUnauthorizedHandler } from '@/lib/api'
 
@@ -35,6 +37,8 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
