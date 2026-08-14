@@ -67,6 +67,10 @@ src/
     auth/
     profile/
     dashboard/
+    categories/
+    products/
+    orders/
+    users/
   i18n/           # i18next init + locales/{uz,ru,en}.json
   lib/            # api.ts (axios instance), types.ts, utils
   index.css       # Tailwind + dgz-ui-shared styles + @theme token ko'prigi
@@ -94,6 +98,7 @@ Batafsil qoidalar — [`.claude/rules/`](.claude/rules/) va [`AGENTS.md`](AGENTS
 3. **`all=false` yubormang** (mahsulotlarda) — backend bug'i tufayli `true` kabi ishlaydi. Kerak bo'lmasa parametrni umuman qo'shmang.
 4. **`DELETE` — haqiqiy o'chirish.** Odatiy holatda `PATCH { is_archived: true }` ishlating.
 5. **Access token 15 daqiqa.** Avtomatik refresh `lib/api.ts` da.
+6. **Jadval ustuniga `type: 'action'` bermang** — kutubxona bunday ustunni jimgina olib tashlaydi va amal tugmalari yo'qoladi.
 
 ---
 

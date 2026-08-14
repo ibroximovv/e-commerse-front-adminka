@@ -193,3 +193,23 @@ export function toPagination<T>(items: T[], meta?: Meta | null): Pagination<T> {
     totalPages: meta?.totalPages ?? 1,
   }
 }
+
+/**
+ * Sahifalash BACKENDDA yo'q bo'lgan ro'yxatlar uchun (`/api/users`,
+ * `/api/orders/admin/all`). `DataTable` o'zi kesmaydi — `docs` ni qanday bersak,
+ * shuni to'liq chizadi. Ma'lumot ko'payganda sahifa qotib qolmasligi uchun
+ * kesish shu yerda.
+ */
+export function paginateLocal<T>(items: T[], page: number, limit: number): Pagination<T> {
+  const totalPages = Math.max(1, Math.ceil(items.length / limit))
+  const safePage = Math.min(Math.max(1, page), totalPages)
+  const start = (safePage - 1) * limit
+
+  return {
+    docs: items.slice(start, start + limit),
+    page: safePage,
+    limit,
+    total: items.length,
+    totalPages,
+  }
+}

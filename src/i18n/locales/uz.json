@@ -8,6 +8,7 @@
     "edit": "Tahrirlash",
     "create": "Qo'shish",
     "search": "Qidirish",
+    "reset": "Tozalash",
     "retry": "Qayta urinish",
     "loading": "Yuklanmoqda...",
     "back": "Orqaga",
@@ -30,8 +31,7 @@
     "logout": "Chiqish",
     "menu": "Menyu",
     "collapse": "Yig'ish",
-    "expand": "Yoyish",
-    "comingSoon": "Tez orada"
+    "expand": "Yoyish"
   },
   "theme": {
     "label": "Mavzu",
@@ -141,13 +141,81 @@
     "loadFailed": "Ma'lumotlarni yuklab bo'lmadi"
   },
   "order": {
+    "title": "Buyurtmalar",
+    "subtitle": "Buyurtmalarni kuzatish va statusini boshqarish",
+    "detailTitle": "Buyurtma",
+    "id": "Raqami",
+    "customer": "Mijoz",
+    "items": "Mahsulotlar",
+    "itemsShort": "Pozitsiyalar",
+    "itemsCount": "{{value}} ta pozitsiya",
+    "noItems": "Buyurtmada mahsulot yo'q",
+    "total": "Jami",
+    "amount": "Summa",
+    "orderStatus": "Buyurtma statusi",
+    "payment": "To'lov",
+    "paymentStatus": "To'lov statusi",
+    "paymentReadOnly": "Faqat ko'rish uchun — admin boshqa foydalanuvchi nomidan to'lay olmaydi",
+    "noPayment": "To'lov yo'q",
+    "provider": "Provayder",
+    "transactionId": "Tranzaksiya ID",
+    "summary": "Qisqacha",
+    "createdAt": "Yaratilgan",
+    "updatedAt": "Yangilangan",
+    "viewDetail": "Batafsil",
+    "viewCustomer": "Mijozni ko'rish",
+    "searchPlaceholder": "Raqam, ism, email yoki telefon",
+    "dateFrom": "Sanadan",
+    "dateTo": "Sanagacha",
+    "totalCount": "Jami: {{value}}",
+    "empty": "Hali buyurtma yo'q",
+    "emptyHint": "Mijozlar buyurtma bergach ular shu yerda ko'rinadi.",
+    "noMatches": "Mos buyurtma topilmadi",
+    "noMatchesHint": "Filtrlarni o'zgartirib yoki tozalab ko'ring.",
+    "changeStatus": "Statusni o'zgartirish",
+    "changeStatusHint": "Faqat keyingi bosqichga o'tish mumkin — ortga qaytarib bo'lmaydi",
+    "finalStatus": "Bu status yakuniy, o'zgartirib bo'lmaydi",
+    "statusChanged": "Status o'zgartirildi: {{status}}",
+    "cancelledNote": "Buyurtma bekor qilingan",
     "status": {
       "PENDING": "Kutilmoqda",
       "CONFIRMED": "Tasdiqlangan",
       "SHIPPED": "Jo'natilgan",
       "DELIVERED": "Yetkazilgan",
       "CANCELLED": "Bekor qilingan"
+    },
+    "action": {
+      "CONFIRMED": "Tasdiqlash",
+      "SHIPPED": "Jo'natilgan deb belgilash",
+      "DELIVERED": "Yetkazildi",
+      "CANCELLED": "Bekor qilish"
     }
+  },
+  "user": {
+    "title": "Foydalanuvchilar",
+    "subtitle": "Ro'yxatdan o'tgan foydalanuvchilarni boshqarish",
+    "editUser": "Foydalanuvchini tahrirlash",
+    "name": "Foydalanuvchi",
+    "noName": "Ism kiritilmagan",
+    "email": "Elektron pochta",
+    "phone": "Telefon",
+    "role": "Rol",
+    "verification": "Tasdiqlash",
+    "language": "Til",
+    "registered": "Ro'yxatdan o'tgan",
+    "searchPlaceholder": "Ism, email yoki telefon",
+    "allRoles": "Barcha rollar",
+    "allVerification": "Barcha holatlar",
+    "totalCount": "Jami: {{value}}",
+    "empty": "Foydalanuvchi yo'q",
+    "emptyHint": "Ro'yxatdan o'tgan foydalanuvchilar shu yerda ko'rinadi.",
+    "noMatches": "Mos foydalanuvchi topilmadi",
+    "noMatchesHint": "Filtrlarni o'zgartirib yoki tozalab ko'ring.",
+    "updated": "Foydalanuvchi yangilandi",
+    "deletedSuccess": "Foydalanuvchi o'chirildi",
+    "cannotDeleteSelf": "O'z hisobingizni o'chira olmaysiz",
+    "readOnlyHint": "Email, rol va tasdiqlash holatini API orqali o'zgartirib bo'lmaydi.",
+    "roleNotice": "Rolni o'zgartirish API'da umuman yo'q — admin faqat seed yoki baza orqali yaratiladi."
   },
   "payment": {
     "status": {
@@ -278,6 +346,7 @@
   "This week": "Shu hafta",
   "This year": "Shu yil",
   "Toggle theme": "Mavzuni almashtirish",
+  "Type text and press CTRL + Enter": "Matn kiriting va CTRL + Enter bosing",
   "Type text and press Enter": "Matn kiriting va Enter bosing",
-  "Type text and press CTRL + Enter": "Matn kiriting va CTRL + Enter bosing"
+  "{{selectedCount}} of {{total}} row(s) selected": "{{total}} tadan {{selectedCount}} ta tanlandi"
 }

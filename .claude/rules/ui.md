@@ -38,6 +38,7 @@ Bular paket hujjatlarida yozilmagan, brauzerda topilgan:
 | `CardDescription` ichida `cn("text-body-sm-regular text-secondary")` | tailwind-merge ikkalasini `text-*` deb to'qnashtiradi va o'lchamni tashlaydi → izoh sarlavha kattaligida chiqadi | O'lcham va rangni o'zingiz bering (`text-sm text-muted-foreground`) |
 | `SheetContent` da fon klassi umuman yo'q | Mobil drawer **shaffof**, orqadagi kontent ko'rinib turadi | `bg-background-secondary` (yoki `bg-background`) qo'shing |
 | i18n kalitlari sifatida inglizcha matnning o'zi ishlatiladi (`t("Light")`, `t("Rows per page")`) | uz/ru interfeysda kutubxona matnlari inglizcha qoladi | Bu kalitlar locale fayllarining **ildizida** turibdi — yangi kutubxona komponenti qo'shsangiz, uning kalitlarini ham qo'shing |
+| `useColumns` ichida `columns.filter((c) => c.type !== 'action')` bor | `type: 'action'` yozilgan ustun jadvaldan **butunlay yo'qoladi** — tahrirlash/o'chirish tugmalari umuman chizilmaydi va xato ham bermaydi | Amal ustuniga `type` **umuman bermang**. `ColumnType` da `type?: 'data' \| 'action'` bo'lgani chalg'itadi — u ustunni chiqarib tashlash uchun, amal ustunini belgilash uchun emas |
 
 ### Mavjud komponentlar
 

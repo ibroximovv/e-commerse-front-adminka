@@ -4,8 +4,9 @@ Adminka ishlari bosqichlarga bo'lingan. Har bir bosqich mustaqil tugallanadi va 
 
 **Holat belgilari:** `[ ]` qilinmagan · `[~]` jarayonda · `[x]` tugallangan
 
-> **Holat (2026-08-13):** 0–5-bosqichlar tugallandi va brauzerda backend bilan tekshirildi.
-> `npm run build` va `npm run lint` toza. Keyingi ish — 6-bosqich (Buyurtmalar).
+> **Holat (2026-08-14):** 0–8-bosqichlar tugallandi va brauzerda backend bilan
+> tekshirildi (test buyurtmalar bilan). `npm run build` va `npm run lint` toza,
+> Vite'ning chunk hajmi ogohlantirishi ham yo'q. Konsol toza.
 
 ---
 
@@ -52,10 +53,8 @@ Backendda statistika endpointi yo'q — hammasi frontendda hisoblanadi.
 - [x] Oxirgi 5 buyurtma ro'yxati
 - [x] Yuklanish skeletonlari va xato holati
 
-> ⚠️ Dev bazada hozircha **bitta ham buyurtma yo'q**, shuning uchun diagramma va
-> "oxirgi buyurtmalar" faqat **bo'sh holatda** tekshirilgan. Ma'lumot bilan
-> ko'rinishini tasdiqlash uchun test buyurtma yaratish kerak (6-bosqichda
-> baribir kerak bo'ladi).
+> Diagramma va "oxirgi buyurtmalar" endi **ma'lumot bilan** ham tekshirildi
+> (6-bosqichda test buyurtmalar yaratilgan).
 
 ---
 
@@ -79,31 +78,39 @@ Backendda statistika endpointi yo'q — hammasi frontendda hisoblanadi.
 
 ## Bosqich 6 — Buyurtmalar
 
-- [ ] Ro'yxat — `GET /api/orders/admin/all` (sahifalash yo'q; frontendda cheklab ko'rsatish)
-- [ ] Detal ko'rinishi — `user`, `items.product`, `payment`
-- [ ] Status o'zgartirish — `PATCH /api/orders/:id/status`; **ketma-ketlik frontendda cheklanadi** (backend tekshirmaydi)
-- [ ] To'lov statusi — faqat ko'rsatish, **to'lov tugmasi yo'q**
-- [ ] Status va sana bo'yicha filtr
+- [x] Ro'yxat — `GET /api/orders/admin/all` (sahifalash yo'q; `paginateLocal()` bilan frontendda kesiladi)
+- [x] Detal ko'rinishi — `user`, `items.product`, `payment`
+- [x] Status o'zgartirish — `PATCH /api/orders/:id/status`; **ketma-ketlik frontendda cheklanadi** (`ORDER_STATUS_FLOW`), yakuniy statuslarda tugma yo'q
+- [x] To'lov statusi — faqat ko'rsatish, **to'lov tugmasi yo'q**
+- [x] Status va sana bo'yicha filtr (+ qidiruv: raqam, ism, email, telefon)
+
+> Detal sahifasi alohida `GET /api/orders/:id` **yubormaydi** — o'sha javobda
+> bog'langan yozuvlar (mahsulot nomi, to'lov) kelishi hujjatlashtirilmagan.
+> `admin/all` da esa kafolatlangan, ustiga kesh ro'yxat va dashboard bilan
+> bo'lishiladi (`['orders', 'admin']`).
 
 ## Bosqich 7 — Foydalanuvchilar
 
-- [ ] Ro'yxat — `GET /api/users` (sahifalash yo'q)
-- [ ] Tahrirlash — `full_name`, `phone`, `photo`, `language`
-- [ ] O'chirish — `useConfirm` bilan
-- [ ] Rolni o'zgartirib bo'lmasligi UI'da aniq ko'rsatilsin (tahrirlanmaydigan maydon + izoh)
+- [x] Ro'yxat — `GET /api/users` (sahifalash yo'q, `paginateLocal()`)
+- [x] Tahrirlash — `full_name`, `phone`, `photo`, `language`
+- [x] O'chirish — `useConfirm` bilan; joriy admin **o'zini o'chira olmaydi**
+- [x] Rolni o'zgartirib bo'lmasligi UI'da aniq ko'rsatilgan (sahifada ogohlantirish + modalda tahrirlanmaydigan blok)
 
 ## Bosqich 8 — Sayqal
 
-- [ ] Responsive audit: 375 / 768 / 1280
-- [ ] A11y: fokus ko'rinishi, klaviatura bilan yurish, kontrast, rang yagona signal emasligi
-- [ ] Barcha ro'yxatlarga skeleton
-- [ ] Error boundary
-- [ ] Konsol toza (ayniqsa i18next "missing key")
-- [ ] `npm run build` va `npm run lint` toza
-- [ ] **Bundle hajmi** — hozir ~1.13 MB (gzip ~356 KB), Vite ogohlantirish beradi.
-      Sabab: `dgz-ui-shared/components/form` barrel'i html-editor (quill) va
-      react-select'ni ham tortadi. Marshrutlarni `lazy()` bilan bo'lish yoki
-      kerakli komponentni to'g'ridan-to'g'ri import qilish kerak.
+- [x] Responsive audit: 375 / 768 / 1280 — sahifa gorizontal scroll qilmaydi, jadval o'z konteyneri ichida siljiydi
+- [x] A11y: `role="tab"`/`aria-selected`, `aria-label` filtrlarda, status rangi doim matn yorlig'i bilan
+- [x] Barcha ro'yxatlarga skeleton
+- [x] Error boundary (`components/ui/ErrorBoundary.tsx`, `App.tsx` da)
+- [x] Konsol toza (i18next "missing key" yo'q — uchala locale kalit-ma-kalit teng)
+- [x] `npm run build` va `npm run lint` toza
+- [x] **Bundle hajmi** — marshrutlar `lazy()` bilan bo'lindi: entry 1.13 MB → **259 KB**
+      (gzip 81 KB), Vite ogohlantirishi yo'q.
+
+> Eng katta chunk hali ham `dgz-ui/form` (474 KB / gzip 150 KB) — ichida quill
+> (html-editor) va react-select bor. `dgz-ui` da alohida `./input` kabi yengil
+> subpath **yo'q**, shuning uchun undan qutulishning yagona yo'li — `MyInput`
+> o'rniga o'z inputimizni yozish. Endi u faqat forma bor sahifada yuklanadi.
 
 ---
 
@@ -120,3 +127,15 @@ Bular endpoint qidirib vaqt yo'qotmaslik uchun qayd etilgan:
 | Logout endpointi | `localStorage` tozalanadi |
 | Kategoriya nomi unikalligi | Frontendda tekshiriladi |
 | Buyurtma status ketma-ketligi | Frontendda cheklanadi |
+
+---
+
+## Tuzatilgan xatolar
+
+**`type: 'action'` ustunlari jadvalda umuman chizilmasdi** (2026-08-14).
+`dgz-ui-shared` ning `useColumns` hooki `columns.filter((c) => c.type !== 'action')`
+qiladi — ya'ni `type: 'action'` ustunni **o'chirib tashlaydi**, amal ustuni deb
+belgilamaydi. Natijada kategoriyalar va mahsulotlar sahifalarida tahrirlash,
+arxivlash va o'chirish tugmalari umuman ko'rinmasdi (xato ham bermasdi).
+Yechim: amal ustuniga `type` bermaslik. Batafsil —
+[`.claude/rules/ui.md`](../.claude/rules/ui.md) dagi tuzoqlar jadvali.

@@ -24,6 +24,14 @@ export function formatDateTime(value?: string | null): string {
   return value ? dayjs(value).format('DD.MM.YYYY HH:mm') : '—'
 }
 
+/**
+ * MongoDB ObjectId 24 belgidan iborat va jadvalda o'qib bo'lmaydi —
+ * oxirgi 6 tasi yetadi ("#a1b2c3").
+ */
+export function shortId(id?: string | null): string {
+  return id ? `#${id.slice(-6).toUpperCase()}` : '—'
+}
+
 /** "Omadbek Ibrohimov" → "OI"; email bo'lsa birinchi harf. */
 export function initials(name?: string | null, fallback?: string | null): string {
   const source = name?.trim() || fallback?.trim() || ''

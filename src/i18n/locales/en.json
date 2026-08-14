@@ -8,6 +8,7 @@
     "edit": "Edit",
     "create": "Add",
     "search": "Search",
+    "reset": "Reset",
     "retry": "Try again",
     "loading": "Loading...",
     "back": "Back",
@@ -30,8 +31,7 @@
     "logout": "Log out",
     "menu": "Menu",
     "collapse": "Collapse",
-    "expand": "Expand",
-    "comingSoon": "Coming soon"
+    "expand": "Expand"
   },
   "theme": {
     "label": "Theme",
@@ -141,13 +141,81 @@
     "loadFailed": "Could not load the data"
   },
   "order": {
+    "title": "Orders",
+    "subtitle": "Track orders and manage their status",
+    "detailTitle": "Order",
+    "id": "Number",
+    "customer": "Customer",
+    "items": "Items",
+    "itemsShort": "Line items",
+    "itemsCount": "{{value}} line items",
+    "noItems": "No items in this order",
+    "total": "Total",
+    "amount": "Amount",
+    "orderStatus": "Order status",
+    "payment": "Payment",
+    "paymentStatus": "Payment status",
+    "paymentReadOnly": "Read-only — an admin cannot pay on a customer's behalf",
+    "noPayment": "No payment",
+    "provider": "Provider",
+    "transactionId": "Transaction ID",
+    "summary": "Summary",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "viewDetail": "View details",
+    "viewCustomer": "Open customer",
+    "searchPlaceholder": "Number, name, email or phone",
+    "dateFrom": "From date",
+    "dateTo": "To date",
+    "totalCount": "Total: {{value}}",
+    "empty": "No orders yet",
+    "emptyHint": "Orders will show up here once customers place them.",
+    "noMatches": "No matching orders",
+    "noMatchesHint": "Try changing or resetting the filters.",
+    "changeStatus": "Change status",
+    "changeStatusHint": "Only the next step is allowed — it cannot be undone",
+    "finalStatus": "This is a final status and cannot be changed",
+    "statusChanged": "Status changed to {{status}}",
+    "cancelledNote": "This order was cancelled",
     "status": {
       "PENDING": "Pending",
       "CONFIRMED": "Confirmed",
       "SHIPPED": "Shipped",
       "DELIVERED": "Delivered",
       "CANCELLED": "Cancelled"
+    },
+    "action": {
+      "CONFIRMED": "Confirm",
+      "SHIPPED": "Mark as shipped",
+      "DELIVERED": "Mark as delivered",
+      "CANCELLED": "Cancel order"
     }
+  },
+  "user": {
+    "title": "Users",
+    "subtitle": "Manage registered users",
+    "editUser": "Edit user",
+    "name": "User",
+    "noName": "No name set",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "verification": "Verification",
+    "language": "Language",
+    "registered": "Registered",
+    "searchPlaceholder": "Name, email or phone",
+    "allRoles": "All roles",
+    "allVerification": "All statuses",
+    "totalCount": "Total: {{value}}",
+    "empty": "No users",
+    "emptyHint": "Registered users will show up here.",
+    "noMatches": "No matching users",
+    "noMatchesHint": "Try changing or resetting the filters.",
+    "updated": "User updated",
+    "deletedSuccess": "User deleted",
+    "cannotDeleteSelf": "You cannot delete your own account",
+    "readOnlyHint": "Email, role and verification status cannot be changed through the API.",
+    "roleNotice": "Changing a role is not available in the API — admins are created via seed or the database only."
   },
   "payment": {
     "status": {
@@ -278,6 +346,7 @@
   "This week": "This week",
   "This year": "This year",
   "Toggle theme": "Toggle theme",
+  "Type text and press CTRL + Enter": "Type text and press CTRL + Enter",
   "Type text and press Enter": "Type text and press Enter",
-  "Type text and press CTRL + Enter": "Type text and press CTRL + Enter"
+  "{{selectedCount}} of {{total}} row(s) selected": "{{selectedCount}} of {{total}} row(s) selected"
 }

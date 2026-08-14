@@ -1,4 +1,3 @@
-import { Badge } from 'dgz-ui/badge'
 import { Store } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
@@ -16,32 +15,8 @@ export function SidebarNav({
 
   return (
     <nav className="flex flex-1 flex-col gap-1 px-3 py-4" aria-label={t('nav.menu')}>
-      {NAV_ITEMS.map(({ to, labelKey, icon: Icon, disabled }) => {
+      {NAV_ITEMS.map(({ to, labelKey, icon: Icon }) => {
         const label = t(labelKey)
-
-        if (disabled) {
-          return (
-            <span
-              key={to}
-              aria-disabled
-              title={collapsed ? `${label} — ${t('nav.comingSoon')}` : undefined}
-              className={cn(
-                'flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground/60',
-                collapsed && 'justify-center px-2',
-              )}
-            >
-              <Icon className="size-[18px] shrink-0" aria-hidden />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 truncate">{label}</span>
-                  <Badge variant="gray" size="sm" rounded="full">
-                    {t('nav.comingSoon')}
-                  </Badge>
-                </>
-              )}
-            </span>
-          )
-        }
 
         return (
           <NavLink

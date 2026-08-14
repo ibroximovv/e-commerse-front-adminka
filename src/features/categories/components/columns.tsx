@@ -82,7 +82,11 @@ export function getCategoryColumns({
       key: 'actions',
       dataIndex: 'id',
       name: t('common.actions'),
-      type: 'action',
+      /*
+       * `type: 'action'` YOZMANG — kutubxonaning `useColumns` hooki
+       * `columns.filter((c) => c.type !== 'action')` qiladi va ustun
+       * jadvaldan butunlay YO'QOLADI (amal tugmalari ko'rinmay qoladi).
+       */
       render: (_: string, record: Category) => (
         <div className="flex items-center justify-end gap-1">
           <Button

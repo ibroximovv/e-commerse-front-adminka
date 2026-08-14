@@ -8,6 +8,7 @@
     "edit": "Редактировать",
     "create": "Добавить",
     "search": "Поиск",
+    "reset": "Сбросить",
     "retry": "Повторить",
     "loading": "Загрузка...",
     "back": "Назад",
@@ -30,8 +31,7 @@
     "logout": "Выйти",
     "menu": "Меню",
     "collapse": "Свернуть",
-    "expand": "Развернуть",
-    "comingSoon": "Скоро"
+    "expand": "Развернуть"
   },
   "theme": {
     "label": "Тема",
@@ -141,13 +141,81 @@
     "loadFailed": "Не удалось загрузить данные"
   },
   "order": {
+    "title": "Заказы",
+    "subtitle": "Отслеживание заказов и управление статусами",
+    "detailTitle": "Заказ",
+    "id": "Номер",
+    "customer": "Клиент",
+    "items": "Товары",
+    "itemsShort": "Позиции",
+    "itemsCount": "Позиций: {{value}}",
+    "noItems": "В заказе нет товаров",
+    "total": "Итого",
+    "amount": "Сумма",
+    "orderStatus": "Статус заказа",
+    "payment": "Оплата",
+    "paymentStatus": "Статус оплаты",
+    "paymentReadOnly": "Только просмотр — админ не может оплатить от имени клиента",
+    "noPayment": "Оплаты нет",
+    "provider": "Провайдер",
+    "transactionId": "ID транзакции",
+    "summary": "Сводка",
+    "createdAt": "Создан",
+    "updatedAt": "Обновлён",
+    "viewDetail": "Подробнее",
+    "viewCustomer": "Открыть клиента",
+    "searchPlaceholder": "Номер, имя, email или телефон",
+    "dateFrom": "С даты",
+    "dateTo": "По дату",
+    "totalCount": "Всего: {{value}}",
+    "empty": "Заказов пока нет",
+    "emptyHint": "Когда клиенты оформят заказы, они появятся здесь.",
+    "noMatches": "Заказы не найдены",
+    "noMatchesHint": "Измените или сбросьте фильтры.",
+    "changeStatus": "Изменить статус",
+    "changeStatusHint": "Доступен только следующий шаг — вернуть назад нельзя",
+    "finalStatus": "Это конечный статус, изменить нельзя",
+    "statusChanged": "Статус изменён: {{status}}",
+    "cancelledNote": "Заказ отменён",
     "status": {
       "PENDING": "В ожидании",
       "CONFIRMED": "Подтверждён",
       "SHIPPED": "Отправлен",
       "DELIVERED": "Доставлен",
       "CANCELLED": "Отменён"
+    },
+    "action": {
+      "CONFIRMED": "Подтвердить",
+      "SHIPPED": "Отметить отправленным",
+      "DELIVERED": "Доставлен",
+      "CANCELLED": "Отменить"
     }
+  },
+  "user": {
+    "title": "Пользователи",
+    "subtitle": "Управление зарегистрированными пользователями",
+    "editUser": "Редактировать пользователя",
+    "name": "Пользователь",
+    "noName": "Имя не указано",
+    "email": "Электронная почта",
+    "phone": "Телефон",
+    "role": "Роль",
+    "verification": "Подтверждение",
+    "language": "Язык",
+    "registered": "Регистрация",
+    "searchPlaceholder": "Имя, email или телефон",
+    "allRoles": "Все роли",
+    "allVerification": "Все статусы",
+    "totalCount": "Всего: {{value}}",
+    "empty": "Пользователей нет",
+    "emptyHint": "Зарегистрированные пользователи появятся здесь.",
+    "noMatches": "Пользователи не найдены",
+    "noMatchesHint": "Измените или сбросьте фильтры.",
+    "updated": "Пользователь обновлён",
+    "deletedSuccess": "Пользователь удалён",
+    "cannotDeleteSelf": "Нельзя удалить собственную учётную запись",
+    "readOnlyHint": "Email, роль и статус подтверждения нельзя изменить через API.",
+    "roleNotice": "Смена роли в API отсутствует — админ создаётся только через seed или базу."
   },
   "payment": {
     "status": {
@@ -278,6 +346,7 @@
   "This week": "Эта неделя",
   "This year": "Этот год",
   "Toggle theme": "Переключить тему",
+  "Type text and press CTRL + Enter": "Введите текст и нажмите CTRL + Enter",
   "Type text and press Enter": "Введите текст и нажмите Enter",
-  "Type text and press CTRL + Enter": "Введите текст и нажмите CTRL + Enter"
+  "{{selectedCount}} of {{total}} row(s) selected": "Выбрано {{selectedCount}} из {{total}}"
 }
