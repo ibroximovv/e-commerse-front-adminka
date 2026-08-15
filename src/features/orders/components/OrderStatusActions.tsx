@@ -1,10 +1,11 @@
 import { Button } from 'dgz-ui/button'
-import { useConfirm } from 'dgz-ui-shared/hooks'
 import { Ban, Check, Loader2, PackageCheck, Truck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { useOrderMutations } from '../hooks'
+import { ConfirmModal, type ConfirmOptions } from '@/components/ui/ConfirmModal'
 import type { Order, OrderStatus } from '@/lib/types'
 import { ORDER_STATUS_FLOW } from '@/lib/types'
 import { errorMessage } from '@/lib/utils'
@@ -17,11 +18,6 @@ const STATUS_ICONS: Record<OrderStatus, LucideIcon> = {
   CANCELLED: Ban,
 }
 
-/**
- * Faqat RUXSAT ETILGAN keyingi statuslarni tugma qilib chiqaradi.
- * Backend ketma-ketlikni tekshirmaydi (`DELIVERED` dan `PENDING` ga ham
- * qaytaradi) — cheklov faqat shu yerda, `ORDER_STATUS_FLOW` orqali.
- */
 export function OrderStatusActions({
   order,
   size = 'sm',
@@ -30,8 +26,16 @@ export function OrderStatusActions({
   size?: 'sm' | 'default'
 }) {
   const { t } = useTranslation()
-  const { confirm } = useConfirm()
   const { updateStatus } = useOrderMutations()
+  const [confirmConfig, setConfirmConfig] = useState<(ConfirmOptions & { isOpen: boolean }) | null>(null)
+
+  const openConfirm = (opts: ConfirmOptions) => {
+    setConfirmConfig({ ...opts, isOpen: true })
+  }
+
+  const closeConfirm = () => {
+    setConfirmConfig(null)
+  }
 
   const next = ORDER_STATUS_FLOW[order.status]
 
@@ -41,15 +45,13 @@ export function OrderStatusActions({
     )
   }
 
-  const apply = (status: OrderStatus) => {
-    updateStatus.mutate(
-      { id: order.id, status },
-      {
-        onSuccess: () =>
-          toast.success(t('order.statusChanged', { status: t(`order.status.${status}`) })),
-        onError: (err) => toast.error(errorMessage(err, t('error.generic'))),
-      },
-    )
+  const apply = async (status: OrderStatus) => {
+    try {
+      await updateStatus.mutateAsync({ id: order.id, status })
+      toast.success(t('order.statusChanged', { status: t(`order.status.${status}`) }))
+    } catch (err) {
+      toast.error(errorMessage(err, t('error.generic')))
+    }
   }
 
   return (
@@ -67,15 +69,21 @@ export function OrderStatusActions({
             disabled={updateStatus.isPending}
             className={
               destructive
-                ? 'text-destructive hover:bg-destructive/10 hover:text-destructive'
-                : undefined
+                ? 'rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive'
+                : 'rounded-xl'
             }
-            /* Bekor qilish va yetkazildi — ortga qaytmaydigan amallar. */
             onClick={() => {
               if (destructive || status === 'DELIVERED') {
-                confirm({ onConfirm: () => apply(status) })
+                openConfirm({
+                  title: t('order.changeStatus'),
+                  description: `${t(`order.action.${status}`)}: ${t('order.changeStatusHint')}`,
+                  confirmText: t(`order.action.${status}`),
+                  iconType: destructive ? 'warning' : 'info',
+                  variant: destructive ? 'danger' : 'warning',
+                  onConfirm: () => apply(status),
+                })
               } else {
-                apply(status)
+                void apply(status)
               }
             }}
           >
@@ -84,6 +92,13 @@ export function OrderStatusActions({
           </Button>
         )
       })}
+
+      {confirmConfig && (
+        <ConfirmModal
+          {...confirmConfig}
+          onClose={closeConfirm}
+        />
+      )}
     </div>
   )
 }

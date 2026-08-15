@@ -38,6 +38,10 @@ const OrderDetailPage = lazyPage(
 )
 const UsersPage = lazyPage(() => import('@/features/users/pages/UsersPage'), 'UsersPage')
 const ProfilePage = lazyPage(() => import('@/features/profile/ProfilePage'), 'ProfilePage')
+const GlobalSearchPage = lazyPage(
+  () => import('@/features/search/GlobalSearchPage'),
+  'GlobalSearchPage',
+)
 
 /** `lazy()` default eksport kutadi, bizda esa hamma sahifa nomli eksport. */
 function lazyPage<K extends string>(
@@ -87,6 +91,7 @@ export function AppRoutes() {
             <Route path="/orders/:id" element={<OrderDetailPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/search" element={<GlobalSearchPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>

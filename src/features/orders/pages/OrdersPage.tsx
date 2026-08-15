@@ -202,6 +202,7 @@ export function OrdersPage() {
               setPage(1)
             }
           }}
+          hasNumbers
           hasPagination
           hasColumnsVisibilityDropdown
         />

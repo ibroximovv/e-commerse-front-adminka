@@ -110,7 +110,29 @@ Backendda statistika endpointi yo'q — hammasi frontendda hisoblanadi.
 > Eng katta chunk hali ham `dgz-ui/form` (474 KB / gzip 150 KB) — ichida quill
 > (html-editor) va react-select bor. `dgz-ui` da alohida `./input` kabi yengil
 > subpath **yo'q**, shuning uchun undan qutulishning yagona yo'li — `MyInput`
-> o'rniga o'z inputimizni yozish. Endi u faqat forma bor sahifada yuklanadi.
+---
+
+## Bosqich 9 — Backend Update (docs/update.md)
+
+- [x] Kategoriyalar ierarxiyasi (`parent_id`, `children`, `slug`, `icon`, `sort_order`, `is_featured`, `product_count`, `breadcrumbs`)
+- [x] `GET /api/categories/tree` (menyular va tanlovlar uchun daraxt ko'rinishi) va sahifalangan `GET /api/categories` (`include_archived=true`)
+- [x] Mahsulot narx va chegirma mantiqi: `final_price` (haqiqiy narx), original `price` (chizilgan), `discount_price` va `discount_percent`
+- [x] Mahsulot preset saralash (`sort`=relevance, newest, price_asc, price_desc, popular, top_rated, most_viewed, discount, name_asc, name_desc)
+- [x] Mahsulot tezkor PATCH endpointlari (`/api/products/:id/flags`, `/api/products/:id/stock`, `/api/products/bulk/archive`)
+- [x] Ombordagi sonni tezkor o'zgartirish modal oynasi (`StockModal`) va ommaviy arxivlash paneli
+- [x] Izohlar va reytinglar modali (`ProductReviewsModal`) hamda reyting taqsimoti charti
+- [x] i18n locales (`uz`, `ru`, `en`) to'liq yangilandi va `npm run build` muvaffaqiyatli o'tdi
+
+---
+
+## Bosqich 10 — Next.js Mijoz (Storefront) Hujjati (docs/client-site.md)
+
+- [x] Next.js 15 App Router loyiha strukturasi va texnologiyalar steki hujjatlashtirildi
+- [x] HTTP / API Envelope adapteri, `fileUrl()` va token revalidation oqimi yozildi
+- [x] Customer Auth (`register`, `verify`, `login`, `refresh`) hamda Next.js Middleware yo'riqnomasi
+- [x] Bosh sahifa (Home), Fasetli Katalog (`/catalog`), Kategoriya (`/categories/[slug]`) va Mahsulot (`/product/[slug]`) marshrutlar xaritasi
+- [x] Savat (`/api/carts`) totals integratsiyasi, Checkout (`/api/orders/checkout`) va To'lovlar (`/api/payments`) oqimi
+- [x] Next.js Metadata API, Image optimization va ISR revalidation me'yorlari shakllantirildi
 
 ---
 

@@ -31,11 +31,25 @@ export interface User {
   updated_at: string
 }
 
+export interface CategoryBreadcrumb {
+  id: string
+  name: string
+  slug: string
+}
+
 export interface Category {
   id: string
   name: string
+  slug: string
   description?: string
   image?: string
+  icon?: string | null
+  parent_id?: string | null
+  children?: Category[]
+  is_featured?: boolean
+  sort_order?: number
+  product_count?: number
+  breadcrumbs?: CategoryBreadcrumb[]
   is_archived: boolean
   created_at: string
   updated_at: string
@@ -46,19 +60,78 @@ export interface ProductAttribute {
   value: string
 }
 
+export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock'
+
+export type ProductSortPreset =
+  | 'relevance'
+  | 'newest'
+  | 'oldest'
+  | 'price_asc'
+  | 'price_desc'
+  | 'popular'
+  | 'top_rated'
+  | 'most_viewed'
+  | 'discount'
+  | 'name_asc'
+  | 'name_desc'
+
 export interface Product {
   id: string
   name: string
+  slug: string
+  sku?: string | null
   description?: string
+  brand?: string | null
+  tags?: string[]
   price: number
+  discount_price?: number | null
+  final_price: number
+  discount_percent: number
   stock: number
+  stock_status?: StockStatus
+  is_new?: boolean
   images: string[]
   attributes: ProductAttribute[]
+  is_top: boolean
+  is_featured: boolean
+  sales_count: number
+  view_count: number
+  rating: number
+  rating_count: number
+  popularity_score: number
   is_archived: boolean
   category_id: string
   category?: Category
+  breadcrumbs?: CategoryBreadcrumb[]
   created_at: string
   updated_at: string
+}
+
+export interface ProductFacets {
+  price: { min: number; max: number }
+  categories: { id: string; name: string; slug: string; count: number }[]
+  brands: { value: string; count: number }[]
+  attributes: { key: string; values: { value: string; count: number }[] }[]
+  counts: { in_stock: number; discounted: number; rating_4_plus: number }
+  attributes_sampled?: boolean
+}
+
+export interface Review {
+  id: string
+  user_id: string
+  user?: User
+  product_id: string
+  rating: number
+  comment?: string
+  is_verified_purchase: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ReviewSummary {
+  average: number
+  count: number
+  distribution: Record<'1' | '2' | '3' | '4' | '5', number>
 }
 
 export interface Payment {
@@ -95,12 +168,16 @@ export interface Tokens {
   refresh_token: string
 }
 
-/** Sahifalash ma'lumoti. Hozircha faqat GET /api/products qaytaradi. */
+/** Sahifalash ma'lumoti va fasetlar. */
 export interface Meta {
   total: number
   page: number
   limit: number
   totalPages: number
+  hasNextPage?: boolean
+  hasPreviousPage?: boolean
+  sort?: string
+  facets?: ProductFacets
 }
 
 /** Barcha muvaffaqiyatli javoblar shu konvertda keladi (ResponseInterceptor). */
@@ -111,10 +188,7 @@ export interface Envelope<T> {
   meta?: Meta | null
 }
 
-/** Buyurtma statusining ruxsat etilgan ketma-ketligi.
- *
- * Backend statuslar ketma-ketligini TEKSHIRMAYDI (DELIVERED dan PENDING ga ham
- * qaytaradi) — cheklov faqat shu yerda. */
+/** Buyurtma statusining ruxsat etilgan ketma-ketligi. */
 export const ORDER_STATUS_FLOW: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
   CONFIRMED: ['SHIPPED', 'CANCELLED'],

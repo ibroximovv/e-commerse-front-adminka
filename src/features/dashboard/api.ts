@@ -1,5 +1,5 @@
 import { getList } from '@/lib/api'
-import type { Order, Product, User } from '@/lib/types'
+import type { Category, Order, Product, User } from '@/lib/types'
 
 /**
  * Backend'da tayyor statistika endpointi YO'Q — sanoqlar shu yerdagi
@@ -9,12 +9,29 @@ export const dashboardApi = {
   /** Sahifalash yo'q — hamma buyurtma bir javobda keladi. */
   orders: () => getList<Order>('/api/orders/admin/all'),
 
+  /** Categories list with product count */
+  categories: () =>
+    getList<Category>('/api/categories', {
+      include_archived: true,
+      with_product_count: true,
+    }),
+
+  /** Products list for stock health analysis */
+  products: () =>
+    getList<Product>('/api/products', {
+      include_archived: true,
+      limit: 100,
+    }),
+
   /**
    * Faqat jami sonni olish uchun: `limit=1` bilan bitta yozuv so'raymiz va
-   * `meta.total` ni o'qiymiz. `all=true` — arxivlanganlar ham hisobga olinadi.
+   * `meta.total` ni o'qiymiz. `include_archived=true` — arxivlanganlar ham hisobga olinadi.
    */
   productsCount: async () => {
-    const { meta } = await getList<Product>('/api/products', { all: true, limit: 1 })
+    const { meta } = await getList<Product>('/api/products', {
+      include_archived: true,
+      limit: 1,
+    })
     return meta?.total ?? 0
   },
 

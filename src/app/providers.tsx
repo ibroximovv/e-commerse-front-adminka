@@ -33,11 +33,16 @@ export function Providers({ children }: { children: ReactNode }) {
       <ThemeProvider defaultTheme={ThemeMode.SYSTEM} storageKey="theme">
         {children}
         <ToastContainer
-          position="top-right"
-          autoClose={4000}
+          position="bottom-right"
+          autoClose={3500}
+          hideProgressBar={false}
           newestOnTop
           closeOnClick
-          theme="colored"
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
           aria-label="Notifications"
         />
       </ThemeProvider>

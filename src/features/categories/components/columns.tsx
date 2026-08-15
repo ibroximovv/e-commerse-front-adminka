@@ -45,13 +45,39 @@ export function getCategoryColumns({
       sortable: true,
       render: (val: string, record: Category) => (
         <div>
-          <span className="font-medium text-foreground">{val}</span>
-          {record.description ? (
-            <p className="line-clamp-1 text-xs text-muted-foreground">
-              {record.description}
-            </p>
-          ) : null}
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-foreground">{val}</span>
+            {record.is_featured && (
+              <Badge type="status" variant="blue" rounded="full">
+                {t('category.featured')}
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="font-mono text-[11px] text-muted-foreground/80">/{record.slug}</span>
+            {record.description ? (
+              <span className="line-clamp-1">— {record.description}</span>
+            ) : null}
+          </div>
         </div>
+      ),
+    },
+    {
+      key: 'product_count',
+      dataIndex: 'product_count',
+      name: t('category.productCount'),
+      sortable: true,
+      render: (val: number | undefined) => (
+        <span className="font-medium text-foreground">{val ?? 0}</span>
+      ),
+    },
+    {
+      key: 'sort_order',
+      dataIndex: 'sort_order',
+      name: t('category.sortOrder'),
+      sortable: true,
+      render: (val: number | undefined) => (
+        <span className="text-xs font-mono text-muted-foreground">{val ?? 0}</span>
       ),
     },
     {

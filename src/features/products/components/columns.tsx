@@ -1,7 +1,7 @@
 import { Badge } from 'dgz-ui/badge'
 import { Button } from 'dgz-ui/button'
 import type { ColumnType } from 'dgz-ui-shared/types'
-import { Archive, ArchiveRestore, Edit, Package, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, Edit, Flame, Layers, Package, Sparkles, Star, Trash2 } from 'lucide-react'
 import { fileUrl } from '@/lib/api'
 import type { Product } from '@/lib/types'
 import { formatPrice } from '@/lib/utils'
@@ -9,6 +9,10 @@ import { formatPrice } from '@/lib/utils'
 interface ColumnCallbacks {
   onEdit: (product: Product) => void
   onToggleArchive: (product: Product) => void
+  onToggleTop?: (product: Product) => void
+  onToggleFeatured?: (product: Product) => void
+  onUpdateStock?: (product: Product) => void
+  onViewReviews?: (product: Product) => void
   onDelete: (product: Product) => void
   t: (key: string) => string
 }
@@ -16,6 +20,10 @@ interface ColumnCallbacks {
 export function getProductColumns({
   onEdit,
   onToggleArchive,
+  onToggleTop,
+  onToggleFeatured,
+  onUpdateStock,
+  onViewReviews,
   onDelete,
   t,
 }: ColumnCallbacks): ColumnType<Product>[] {
@@ -48,12 +56,23 @@ export function getProductColumns({
       sortable: true,
       render: (val: string, record: Product) => (
         <div>
-          <span className="font-medium text-foreground">{val}</span>
-          {record.description ? (
-            <p className="line-clamp-1 text-xs text-muted-foreground">
-              {record.description}
-            </p>
-          ) : null}
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-foreground">{val}</span>
+            {record.is_top && (
+              <span title="TOP" className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-600">
+                <Flame className="size-3" /> TOP
+              </span>
+            )}
+            {record.is_featured && (
+              <span title="Featured" className="inline-flex items-center gap-0.5 rounded-full bg-indigo-500/10 px-1.5 py-0.5 text-[10px] font-bold text-indigo-600">
+                <Sparkles className="size-3" />
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {record.brand && <span className="font-medium text-brand">{record.brand}</span>}
+            {record.sku && <span className="font-mono text-[11px] text-muted-foreground/80">SKU: {record.sku}</span>}
+          </div>
         </div>
       ),
     },
@@ -69,28 +88,75 @@ export function getProductColumns({
     },
     {
       key: 'price',
-      dataIndex: 'price',
+      dataIndex: 'final_price',
       name: t('product.price'),
       sortable: true,
-      render: (val: number) => (
-        <span className="font-semibold text-foreground">
-          {formatPrice(val)}
-        </span>
-      ),
+      render: (_: unknown, record: Product) => {
+        const displayPrice = record.final_price ?? record.price
+        const hasDiscount = (record.discount_percent ?? 0) > 0
+
+        return (
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-foreground">
+                {formatPrice(displayPrice)}
+              </span>
+              {hasDiscount && (
+                <span className="rounded bg-destructive/10 px-1 py-0.2 text-[10px] font-bold text-destructive">
+                  -{record.discount_percent}%
+                </span>
+              )}
+            </div>
+            {hasDiscount && (
+              <span className="text-[11px] text-muted-foreground line-through">
+                {formatPrice(record.price)}
+              </span>
+            )}
+          </div>
+        )
+      },
     },
     {
       key: 'stock',
       dataIndex: 'stock',
       name: t('product.stock'),
       sortable: true,
-      render: (val: number) => (
-        <span
-          className={`text-xs font-medium ${
-            val > 0 ? 'text-foreground' : 'text-destructive font-semibold'
-          }`}
+      render: (val: number, record: Product) => (
+        <button
+          type="button"
+          onClick={() => onUpdateStock?.(record)}
+          className="flex items-center gap-1 text-xs font-medium cursor-pointer hover:underline"
         >
-          {val > 0 ? val : t('product.outOfStock')}
-        </span>
+          <span
+            className={
+              val > 5
+                ? 'text-foreground'
+                : val > 0
+                ? 'text-warning font-semibold'
+                : 'text-destructive font-semibold'
+            }
+          >
+            {val > 0 ? val : t('product.outOfStock')}
+          </span>
+          <Layers className="size-3 text-muted-foreground/60" />
+        </button>
+      ),
+    },
+    {
+      key: 'rating',
+      dataIndex: 'rating',
+      name: t('product.rating'),
+      sortable: true,
+      render: (_: unknown, record: Product) => (
+        <button
+          type="button"
+          onClick={() => onViewReviews?.(record)}
+          className="flex items-center gap-1 text-xs hover:text-foreground cursor-pointer"
+        >
+          <Star className="size-3.5 fill-amber-400 text-amber-400" />
+          <span className="font-medium text-foreground">{record.rating ?? 0}</span>
+          <span className="text-[11px] text-muted-foreground">({record.rating_count ?? 0})</span>
+        </button>
       ),
     },
     {
@@ -112,13 +178,34 @@ export function getProductColumns({
       key: 'actions',
       dataIndex: 'id',
       name: t('common.actions'),
-      /*
-       * `type: 'action'` YOZMANG — kutubxonaning `useColumns` hooki
-       * `columns.filter((c) => c.type !== 'action')` qiladi va ustun
-       * jadvaldan butunlay YO'QOLADI (amal tugmalari ko'rinmay qoladi).
-       */
       render: (_: string, record: Product) => (
         <div className="flex items-center justify-end gap-1">
+          {onToggleTop && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onToggleTop(record)}
+              title="TOP Flag"
+              className={record.is_top ? 'text-amber-500' : 'text-muted-foreground'}
+            >
+              <Flame className="size-4" />
+            </Button>
+          )}
+
+          {onToggleFeatured && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onToggleFeatured(record)}
+              title="Featured Flag"
+              className={record.is_featured ? 'text-indigo-600' : 'text-muted-foreground'}
+            >
+              <Sparkles className="size-4" />
+            </Button>
+          )}
+
           <Button
             type="button"
             variant="ghost"

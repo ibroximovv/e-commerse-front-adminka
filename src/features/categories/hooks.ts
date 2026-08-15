@@ -1,11 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { categoriesApi } from './api'
-import type { CategoryInput, CategoryUpdateInput } from './types'
+import type { CategoryFilters, CategoryInput, CategoryUpdateInput } from './types'
 
-export function useCategories(all = true) {
+export function useCategories(filters: CategoryFilters = { include_archived: true }) {
   return useQuery({
-    queryKey: ['categories', { all }],
-    queryFn: () => categoriesApi.list(all),
+    queryKey: ['categories', filters],
+    queryFn: () => categoriesApi.list(filters),
+    placeholderData: (prev) => prev,
+  })
+}
+
+export function useCategoryTree(params?: {
+  with_product_count?: boolean
+  root_id?: string
+  include_archived?: boolean
+}) {
+  return useQuery({
+    queryKey: ['categories', 'tree', params],
+    queryFn: () => categoriesApi.tree(params),
     placeholderData: (prev) => prev,
   })
 }
