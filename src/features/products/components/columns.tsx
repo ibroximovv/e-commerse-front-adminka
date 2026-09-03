@@ -95,6 +95,15 @@ export function getProductColumns({
         const displayPrice = record.final_price ?? record.price
         const hasDiscount = (record.discount_percent ?? 0) > 0
 
+        /* Narxsiz mahsulot savatga tushmaydi — 0 so'm ko'rsatish chalg'itadi */
+        if (record.price_on_request) {
+          return (
+            <span className="rounded-md bg-warning-muted px-2 py-0.5 text-[11px] font-medium text-warning">
+              {t('product.priceOnRequestShort')}
+            </span>
+          )
+        }
+
         return (
           <div>
             <div className="flex items-center gap-1.5">

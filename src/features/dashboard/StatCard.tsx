@@ -1,14 +1,11 @@
-import { Card, CardContent } from 'dgz-ui/card'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
 
 export function StatCard({
   label,
   value,
   hint,
   icon: Icon,
-  tone = 'neutral',
 }: {
   label: ReactNode
   value: ReactNode
@@ -16,33 +13,25 @@ export function StatCard({
   icon: LucideIcon
   tone?: 'neutral' | 'brand' | 'success' | 'warning'
 }) {
-  const tones = {
-    neutral: 'bg-muted text-muted-foreground',
-    brand: 'bg-brand-muted text-brand',
-    success: 'bg-success-muted text-success',
-    warning: 'bg-warning-muted text-warning',
-  }
-
   return (
-    <Card>
-      <CardContent className="flex items-start justify-between gap-4 p-5">
+    <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <p className="truncate text-sm text-muted-foreground">{label}</p>
-          <p className="text-2xl font-semibold tracking-tight text-foreground">
+          <p className="truncate text-xs font-medium text-muted-foreground">
+            {label}
+          </p>
+          <p className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {value}
           </p>
-          {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+          {hint ? (
+            <p className="text-xs text-muted-foreground truncate">{hint}</p>
+          ) : null}
         </div>
 
-        <span
-          className={cn(
-            'flex size-10 shrink-0 items-center justify-center rounded-xl',
-            tones[tone],
-          )}
-        >
-          <Icon className="size-5" aria-hidden />
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground">
+          <Icon className="size-4" aria-hidden />
         </span>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

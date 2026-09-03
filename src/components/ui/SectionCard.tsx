@@ -34,9 +34,9 @@ export function SectionCard({
   contentClassName?: string
 }) {
   return (
-    <Card className={cn('overflow-hidden', className)}>
-      <CardHeader className="gap-1 p-5 pb-4">
-        <CardTitle className="justify-start gap-2 text-base font-semibold">
+    <Card className={cn('overflow-hidden rounded-xl border border-border bg-card shadow-none', className)}>
+      <CardHeader className="gap-1 p-4 sm:p-5 pb-3">
+        <CardTitle className="justify-start gap-2 text-sm font-semibold tracking-tight text-foreground sm:text-base">
           {Icon ? (
             <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           ) : null}
@@ -45,13 +45,13 @@ export function SectionCard({
         </CardTitle>
 
         {description ? (
-          <CardDescription className="text-sm text-muted-foreground">
+          <CardDescription className="text-xs text-muted-foreground">
             {description}
           </CardDescription>
         ) : null}
       </CardHeader>
 
-      <CardContent className={cn('p-5 pt-0', contentClassName)}>{children}</CardContent>
+      <CardContent className={cn('p-4 sm:p-5 pt-0', contentClassName)}>{children}</CardContent>
     </Card>
   )
 }

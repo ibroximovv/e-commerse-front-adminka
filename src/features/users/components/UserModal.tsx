@@ -4,7 +4,7 @@ import { Button } from 'dgz-ui/button'
 import { Form } from 'dgz-ui/form'
 import { MyInput } from 'dgz-ui-shared/components/form'
 import { MyModal } from 'dgz-ui-shared/components/modal'
-import { Info, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -12,17 +12,16 @@ import { toast } from 'react-toastify'
 import { z } from 'zod'
 import { useUserMutations } from '../hooks'
 import { AvatarUpload } from '@/components/ui/AvatarUpload'
-import { RoleBadge } from '@/components/ui/StatusBadge'
 import { LANGUAGES } from '@/i18n'
-import type { Language, User } from '@/lib/types'
+import type { Language, Role, User } from '@/lib/types'
 import { errorMessage } from '@/lib/utils'
 
-/* Backend DTO'sida faqat shu maydonlar bor — `role`, `email`, `is_verified` yo'q. */
 const schema = z.object({
   full_name: z.string().max(120).optional(),
   phone: z.string().max(32).optional(),
   photo: z.string().optional(),
   language: z.enum(['uz', 'ru', 'en']),
+  role: z.enum(['ADMIN', 'USER']),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -37,16 +36,23 @@ export function UserModal({
   user?: User | null
 }) {
   const { t } = useTranslation()
-  const { update } = useUserMutations()
+  const { update, updateRole } = useUserMutations()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { full_name: '', phone: '', photo: undefined, language: 'uz' },
+    defaultValues: {
+      full_name: '',
+      phone: '',
+      photo: undefined,
+      language: 'uz',
+      role: 'USER',
+    },
   })
 
   const { control, handleSubmit, reset, setValue } = form
   const photo = useWatch({ control, name: 'photo' })
   const language = useWatch({ control, name: 'language' })
+  const role = useWatch({ control, name: 'role' })
 
   useEffect(() => {
     if (isOpen && user) {
@@ -55,15 +61,22 @@ export function UserModal({
         phone: user.phone ?? '',
         photo: user.photo,
         language: user.language,
+        role: user.role,
       })
     }
   }, [isOpen, user, reset])
 
-  const onSubmit = handleSubmit((values) => {
+  const isSaving = update.isPending || updateRole.isPending
+
+  const onSubmit = handleSubmit(async (values) => {
     if (!user) return
 
-    update.mutate(
-      {
+    try {
+      if (values.role !== user.role) {
+        await updateRole.mutateAsync({ id: user.id, role: values.role })
+      }
+
+      await update.mutateAsync({
         id: user.id,
         body: {
           full_name: values.full_name?.trim() || undefined,
@@ -71,15 +84,13 @@ export function UserModal({
           photo: values.photo,
           language: values.language,
         },
-      },
-      {
-        onSuccess: () => {
-          toast.success(t('user.updated'))
-          onClose()
-        },
-        onError: (err) => toast.error(errorMessage(err, t('error.generic'))),
-      },
-    )
+      })
+
+      toast.success(t('user.updated'))
+      onClose()
+    } catch (err) {
+      toast.error(errorMessage(err, t('error.generic')))
+    }
   })
 
   return (
@@ -116,6 +127,31 @@ export function UserModal({
               />
             </div>
 
+            {/* Role selector */}
+            <div className="space-y-1.5">
+              <span className="text-sm font-medium text-foreground">
+                {t('user.role')}
+              </span>
+              <div role="radiogroup" aria-label={t('user.role')} className="flex gap-2">
+                {(['USER', 'ADMIN'] as Role[]).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    role="radio"
+                    aria-checked={role === r}
+                    onClick={() => setValue('role', r, { shouldDirty: true })}
+                    className={
+                      role === r
+                        ? 'flex-1 rounded-xl border border-brand bg-brand/10 px-3 py-2 text-sm font-bold text-brand shadow-xs'
+                        : 'flex-1 rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground'
+                    }
+                  >
+                    {t(`role.${r}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <span className="text-sm font-medium text-foreground">
                 {t('user.language')}
@@ -130,8 +166,8 @@ export function UserModal({
                     onClick={() => setValue('language', code, { shouldDirty: true })}
                     className={
                       language === code
-                        ? 'flex-1 rounded-lg border border-brand bg-brand-muted px-3 py-2 text-sm font-medium text-brand'
-                        : 'flex-1 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground'
+                        ? 'flex-1 rounded-xl border border-brand bg-brand-muted px-3 py-2 text-sm font-medium text-brand'
+                        : 'flex-1 rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground'
                     }
                   >
                     {t(`language.${code}`)}
@@ -140,18 +176,13 @@ export function UserModal({
               </div>
             </div>
 
-            {/* Tahrirlanmaydigan maydonlar — nega ekanligi bilan birga */}
-            <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+            {/* Non-editable fields */}
+            <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="text-muted-foreground">{t('user.email')}</span>
-                <span className="break-all text-right font-medium text-foreground">
+                <span className="break-all text-right font-medium text-foreground font-mono">
                   {user.email}
                 </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">{t('user.role')}</span>
-                <RoleBadge role={user.role} />
               </div>
 
               <div className="flex items-center justify-between gap-3 text-sm">
@@ -164,11 +195,6 @@ export function UserModal({
                   {user.is_verified ? t('profile.verified') : t('profile.notVerified')}
                 </Badge>
               </div>
-
-              <p className="flex items-start gap-2 border-t border-border pt-3 text-xs text-muted-foreground">
-                <Info className="mt-px size-3.5 shrink-0" aria-hidden />
-                {t('user.readOnlyHint')}
-              </p>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
@@ -176,13 +202,13 @@ export function UserModal({
                 type="button"
                 variant="secondary"
                 onClick={onClose}
-                disabled={update.isPending}
+                disabled={isSaving}
               >
                 {t('common.cancel')}
               </Button>
 
-              <Button type="submit" disabled={update.isPending}>
-                {update.isPending ? (
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
                   <>
                     <Loader2 className="size-4 animate-spin" aria-hidden />
                     {t('common.saving')}

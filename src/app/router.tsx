@@ -37,6 +37,10 @@ const OrderDetailPage = lazyPage(
   'OrderDetailPage',
 )
 const UsersPage = lazyPage(() => import('@/features/users/pages/UsersPage'), 'UsersPage')
+const PaymentsPage = lazyPage(
+  () => import('@/features/payments/pages/PaymentsPage'),
+  'PaymentsPage',
+)
 const ProfilePage = lazyPage(() => import('@/features/profile/ProfilePage'), 'ProfilePage')
 const GlobalSearchPage = lazyPage(
   () => import('@/features/search/GlobalSearchPage'),
@@ -89,6 +93,7 @@ export function AppRoutes() {
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/orders/:id" element={<OrderDetailPage />} />
+            <Route path="/payments" element={<PaymentsPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/search" element={<GlobalSearchPage />} />

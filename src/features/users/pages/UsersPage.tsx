@@ -1,21 +1,22 @@
 import { Button } from 'dgz-ui/button'
 import { DataTable } from 'dgz-ui-shared/components/datatable'
 import { useDocumentTitle } from 'dgz-ui-shared/hooks'
-import { RotateCcw, Search, Users as UsersIcon } from 'lucide-react'
+import { RotateCcw, Users as UsersIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getUserColumns } from '../components/columns'
 import { UserModal } from '../components/UserModal'
-import { useUserMutations, useUsers } from '../hooks'
+import { useUserMutations, useUsers, useUserStats } from '../hooks'
 import { DEFAULT_USER_FILTERS } from '../types'
 import type { UserFilters } from '../types'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { NativeSelect, SearchInput } from '@/components/ui/Field'
 import { EmptyState, ErrorState, TableSkeleton } from '@/components/ui/States'
 import { ConfirmModal, type ConfirmOptions } from '@/components/ui/ConfirmModal'
 import { useProfile } from '@/features/auth/hooks'
-import { paginateLocal } from '@/lib/api'
+import { paginateLocal, toPagination } from '@/lib/api'
 import type { Role, User } from '@/lib/types'
 import { errorMessage } from '@/lib/utils'
 
@@ -24,10 +25,6 @@ export function UsersPage() {
   useDocumentTitle(t('user.title'))
 
   const { data: profile } = useProfile()
-  const { data, isLoading, isError, error, refetch } = useUsers()
-  const { remove } = useUserMutations()
-
-  /* Buyurtma detalidan "mijozni ko'rish" havolasi `?search=` bilan keladi. */
   const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState<UserFilters>(() => ({
     ...DEFAULT_USER_FILTERS,
@@ -35,6 +32,15 @@ export function UsersPage() {
   }))
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
+
+  const { data, isLoading, isError, error, refetch } = useUsers({
+    page,
+    limit,
+    role: filters.role !== 'ALL' ? filters.role : undefined,
+    search: filters.search.trim() || undefined,
+  })
+  const { data: userStats } = useUserStats()
+  const { remove } = useUserMutations()
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
@@ -54,24 +60,12 @@ export function UsersPage() {
   const users = useMemo(() => rawUsers ?? [], [rawUsers])
 
   const filtered = useMemo(() => {
-    const query = filters.search.trim().toLowerCase()
-
     return users.filter((user) => {
-      if (filters.role !== 'ALL' && user.role !== filters.role) return false
       if (filters.verified === 'VERIFIED' && !user.is_verified) return false
       if (filters.verified === 'UNVERIFIED' && user.is_verified) return false
-
-      if (query) {
-        const haystack = [user.full_name, user.email, user.phone]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-        if (!haystack.includes(query)) return false
-      }
-
       return true
     })
-  }, [users, filters])
+  }, [users, filters.verified])
 
   const handleEdit = (user: User) => {
     setEditingUser(user)
@@ -118,7 +112,7 @@ export function UsersPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <PageHeader title={t('user.title')} description={t('user.subtitle')} />
         <TableSkeleton rows={6} columns={6} />
       </div>
@@ -129,76 +123,74 @@ export function UsersPage() {
     return <ErrorState error={error} onRetry={() => void refetch()} />
   }
 
+  const totalCount = userStats?.total_users ?? data?.meta?.total ?? users.length
+  const verifiedCount = userStats?.verified_users
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         title={t('user.title')}
         description={t('user.subtitle')}
         actions={
-          <span className="rounded-full bg-muted/60 border border-border/40 px-3 py-1 text-xs font-semibold text-muted-foreground">
-            {t('user.totalCount', { value: users.length })}
-          </span>
+          <div className="flex items-center gap-2">
+            {verifiedCount !== undefined && (
+              <span className="rounded bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                {t('profile.verified')}: {verifiedCount}
+              </span>
+            )}
+            <span className="rounded bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {t('user.totalCount', { value: totalCount })}
+            </span>
+          </div>
         }
       />
 
-      {/* Rolni o'zgartirib bo'lmasligi */}
-      <p className="rounded-xl border border-info/30 bg-info-muted/60 px-4 py-2.5 text-xs font-medium text-info shadow-2xs">
-        {t('user.roleNotice')}
-      </p>
+      <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-3.5 lg:flex-row lg:items-center lg:justify-between">
+        <SearchInput
+          value={filters.search}
+          onChange={(e) => setFilter('search', e.target.value)}
+          placeholder={t('user.searchPlaceholder')}
+          aria-label={t('user.searchPlaceholder')}
+          wrapperClassName="lg:max-w-sm"
+        />
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-card/60 p-4 shadow-xs backdrop-blur-md lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative w-full lg:max-w-sm">
-          <Search
-            className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={filters.search}
-            onChange={(e) => setFilter('search', e.target.value)}
-            placeholder={t('user.searchPlaceholder')}
-            aria-label={t('user.searchPlaceholder')}
-            className="h-9 w-full rounded-xl border border-input bg-card/60 pl-8 pr-3 text-sm text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <select
+        <div className="flex flex-wrap items-center gap-2">
+          <NativeSelect
             value={filters.role}
             onChange={(e) => setFilter('role', e.target.value as Role | 'ALL')}
             aria-label={t('user.role')}
-            className="h-9 min-w-[140px] rounded-xl border border-input bg-card/60 px-3 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="w-auto min-w-[120px]"
           >
             <option value="ALL">{t('user.allRoles')}</option>
             <option value="ADMIN">{t('role.ADMIN')}</option>
             <option value="USER">{t('role.USER')}</option>
-          </select>
+          </NativeSelect>
 
-          <select
+          <NativeSelect
             value={filters.verified}
             onChange={(e) =>
               setFilter('verified', e.target.value as UserFilters['verified'])
             }
             aria-label={t('user.verification')}
-            className="h-9 min-w-[140px] rounded-xl border border-input bg-card/60 px-3 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="w-auto min-w-[130px]"
           >
             <option value="ALL">{t('user.allVerification')}</option>
             <option value="VERIFIED">{t('profile.verified')}</option>
             <option value="UNVERIFIED">{t('profile.notVerified')}</option>
-          </select>
+          </NativeSelect>
 
           {isFiltered ? (
             <Button
               type="button"
               variant="secondary"
               size="sm"
-              className="rounded-xl"
+              className="rounded-lg text-xs"
               onClick={() => {
                 setFilters(DEFAULT_USER_FILTERS)
                 setPage(1)
               }}
             >
-              <RotateCcw className="size-4" aria-hidden />
+              <RotateCcw className="size-3 mr-1" aria-hidden />
               {t('common.reset')}
             </Button>
           ) : null}
@@ -206,22 +198,22 @@ export function UsersPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-border/40 bg-card p-12 text-center shadow-xs">
+        <div className="rounded-xl border border-border bg-card p-10 text-center">
           <EmptyState
-            icon={<UsersIcon className="size-10 text-muted-foreground" />}
+            icon={<UsersIcon className="size-8 text-muted-foreground" />}
             title={isFiltered ? t('user.noMatches') : t('user.empty')}
             description={isFiltered ? t('user.noMatchesHint') : t('user.emptyHint')}
             action={
               isFiltered ? (
                 <Button
                   variant="secondary"
-                  className="rounded-xl"
+                  className="rounded-lg text-xs"
                   onClick={() => {
                     setFilters(DEFAULT_USER_FILTERS)
                     setPage(1)
                   }}
                 >
-                  <RotateCcw className="size-4" aria-hidden />
+                  <RotateCcw className="size-3.5 mr-1" aria-hidden />
                   {t('common.reset')}
                 </Button>
               ) : undefined
@@ -233,8 +225,7 @@ export function UsersPage() {
           tableKey="users-table"
           rowKey="id"
           columns={columns}
-          /* Backendda sahifalash yo'q — kesish mijoz tomonda. */
-          dataSource={paginateLocal(filtered, page, limit)}
+          dataSource={data?.meta ? toPagination(filtered, data.meta) : paginateLocal(filtered, page, limit)}
           onParamChange={(params: Record<string, unknown>) => {
             if (typeof params.page === 'number' && params.page !== page) {
               setPage(params.page)

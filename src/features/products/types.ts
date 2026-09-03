@@ -1,20 +1,36 @@
-import type { ProductAttribute, ProductSortPreset, StockStatus } from '@/lib/types'
+import type { Localized, ProductSortPreset, StockStatus } from '@/lib/types'
+
+/** Yozishda atributning har bir maydoni ko'p tilli. */
+export interface ProductAttributeInput {
+  key: Localized
+  value: Localized
+  unit?: Localized
+}
 
 export interface ProductInput {
-  name: string
+  /** Kamida bitta til majburiy; bo'shlari to'ldirilganidan nusxalanadi. */
+  name: Localized
   slug?: string
   sku?: string | null
-  description?: string
+  description?: Localized
   brand?: string | null
   tags?: string[]
   price: number
   discount_price?: number | null
+  /** Yoqilsa `price` 0 bo'lib saqlanadi va mahsulot savatga tushmaydi. */
+  price_on_request?: boolean
   stock: number
   category_id: string
   images?: string[]
-  attributes?: ProductAttribute[]
+  /** PATCH da TO'LIQ massiv yuboriladi — backend eskisini butunlay almashtiradi. */
+  attributes?: ProductAttributeInput[]
   is_top?: boolean
   is_featured?: boolean
+  /* Fiskalizatsiya — bo'sh qolsa backend `.env` dagi zaxira qiymatni oladi. */
+  ikpu_code?: string | null
+  package_code?: string | null
+  vat_percent?: number | null
+  units?: number | null
 }
 
 export interface ProductUpdateInput extends Partial<ProductInput> {
@@ -39,17 +55,19 @@ export interface BulkArchiveInput {
 export interface ProductFilters {
   page?: number
   limit?: number
+  /** Qidiruv uchala tilda ishlaydi — ruscha so'rov o'zbekcha interfeysda ham topadi. */
   search?: string
   category_id?: string
   category_ids?: string | string[]
   category_slug?: string
-  include_descendants?: boolean
   min_price?: number
   max_price?: number
+  price_on_request?: boolean
   has_discount?: boolean
   min_discount_percent?: number
   brands?: string
   tags?: string
+  /** `Key:Value` juftliklari, vergul bilan: `Power:250,Material:Copper`. */
   attributes?: string
   stock_status?: StockStatus
   in_stock?: boolean

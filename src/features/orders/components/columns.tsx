@@ -17,8 +17,8 @@ export function getOrderColumns({ onView, t }: ColumnCallbacks): ColumnType<Orde
       dataIndex: 'id',
       name: t('order.id'),
       render: (val: string) => (
-        <span className="font-mono text-xs font-medium text-foreground">
-          {shortId(val)}
+        <span className="font-mono text-xs font-bold text-foreground">
+          #{shortId(val)}
         </span>
       ),
     },
@@ -28,15 +28,15 @@ export function getOrderColumns({ onView, t }: ColumnCallbacks): ColumnType<Orde
       name: t('order.customer'),
       render: (_: string, record: Order) => (
         <div className="flex items-center gap-2.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-brand/10 text-xs font-bold text-brand">
             {initials(record.user?.full_name, record.user?.email)}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="truncate text-xs font-semibold text-foreground">
               {record.user?.full_name || record.user?.email || t('common.none')}
             </p>
             {record.user?.full_name && record.user.email ? (
-              <p className="truncate text-xs text-muted-foreground">
+              <p className="truncate text-[11px] text-muted-foreground">
                 {record.user.email}
               </p>
             ) : null}
@@ -49,7 +49,7 @@ export function getOrderColumns({ onView, t }: ColumnCallbacks): ColumnType<Orde
       dataIndex: 'items',
       name: t('order.items'),
       render: (items: Order['items']) => (
-        <span className="text-sm tabular-nums text-muted-foreground">
+        <span className="rounded-full bg-muted/60 border border-border/40 px-2 py-0.5 text-xs font-semibold tabular-nums text-foreground">
           {items?.length ?? 0}
         </span>
       ),
@@ -60,7 +60,7 @@ export function getOrderColumns({ onView, t }: ColumnCallbacks): ColumnType<Orde
       name: t('order.total'),
       sortable: true,
       render: (val: number) => (
-        <span className="text-sm font-medium tabular-nums text-foreground">
+        <span className="text-sm font-bold tabular-nums text-foreground">
           {formatPrice(val)}
         </span>
       ),
@@ -98,24 +98,22 @@ export function getOrderColumns({ onView, t }: ColumnCallbacks): ColumnType<Orde
       key: 'actions',
       dataIndex: 'id',
       name: t('common.actions'),
-      /*
-       * `type: 'action'` YOZMANG — kutubxonaning `useColumns` hooki
-       * `columns.filter((c) => c.type !== 'action')` qiladi va ustun
-       * jadvaldan butunlay YO'QOLADI (amal tugmalari ko'rinmay qoladi).
-       */
       render: (_: string, record: Order) => (
         <div className="flex items-center justify-end">
           <Button
             type="button"
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => onView(record)}
+            className="rounded-lg text-xs"
             title={t('order.viewDetail')}
           >
-            <Eye className="size-4" />
+            <Eye className="size-3.5 mr-1" />
+            {t('common.view')}
           </Button>
         </div>
       ),
     },
   ]
 }
+

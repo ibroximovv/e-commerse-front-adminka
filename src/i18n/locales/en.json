@@ -19,13 +19,22 @@
     "actions": "Actions",
     "none": "—",
     "optional": "optional",
-    "required": "required"
+    "required": "required",
+    "add": "Add",
+    "adminHub": "Admin control panel",
+    "confirm": "Confirm",
+    "copied": "Copied",
+    "view": "View",
+    "archived": "Archived",
+    "copy": "Copy",
+    "date": "Date"
   },
   "nav": {
     "dashboard": "Dashboard",
     "products": "Products",
     "categories": "Categories",
     "orders": "Orders",
+    "payments": "Payments",
     "users": "Users",
     "search": "Global Search",
     "profile": "Profile",
@@ -59,6 +68,17 @@
     "hidePassword": "Hide password",
     "welcome": "Welcome back!",
     "sessionExpired": "Your session has expired. Please sign in again.",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset Password",
+    "sendOtp": "Send Code",
+    "verifyCode": "Verify Code",
+    "code": "6-digit verification code",
+    "codePlaceholder": "123456",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "At least 6 characters",
+    "backToLogin": "Back to login",
+    "otpSent": "Verification code has been sent to your email",
+    "passwordResetSuccess": "Password updated successfully! Sign in with your new password.",
     "errors": {
       "invalidCredentials": "Invalid email or password",
       "notVerified": "Account is not verified",
@@ -69,7 +89,8 @@
       "emailRequired": "Enter your email",
       "emailInvalid": "Invalid email format",
       "passwordRequired": "Enter your password",
-      "passwordMin": "Password must be at least 6 characters"
+      "passwordMin": "Password must be at least 6 characters",
+      "codeRequired": "Enter 6-digit code"
     }
   },
   "profile": {
@@ -146,7 +167,17 @@
     "stockHealthHint": "Distribution of product inventory on stock",
     "inStockProducts": "In Stock",
     "lowStockProducts": "Low Stock (< 5 pcs)",
-    "outOfStockProducts": "Out of Stock"
+    "outOfStockProducts": "Out of Stock",
+    "monthlySalesTitle": "Sales Dynamics (Monthly)",
+    "monthlySalesSubtitle": "Revenue and order volume over recent months",
+    "revenue": "Revenue",
+    "topProductsTitle": "Top Selling Products",
+    "topProductsSubtitle": "Top 5 high demand products",
+    "topProductsEmpty": "No data available yet",
+    "paidRevenue": "Paid",
+    "deliveredCount": "Delivered",
+    "lowStock": "Low stock",
+    "verifiedUsers": "Verified"
   },
   "search": {
     "title": "Global Search & Filters",
@@ -200,6 +231,10 @@
     "finalStatus": "This is a final status and cannot be changed",
     "statusChanged": "Status changed to {{status}}",
     "cancelledNote": "This order was cancelled",
+    "shippingAddress": "Shipping address",
+    "customerNotes": "Customer note",
+    "cancelOrder": "Cancel order",
+    "archiveOrder": "Archive order",
     "status": {
       "PENDING": "Pending",
       "CONFIRMED": "Confirmed",
@@ -212,7 +247,9 @@
       "SHIPPED": "Mark as shipped",
       "DELIVERED": "Mark as delivered",
       "CANCELLED": "Cancel order"
-    }
+    },
+    "orderArchived": "Order archived",
+    "callCustomer": "Call"
   },
   "user": {
     "title": "Users",
@@ -235,17 +272,52 @@
     "noMatches": "No matching users",
     "noMatchesHint": "Try changing or resetting the filters.",
     "updated": "User updated",
+    "roleUpdated": "User role updated",
     "deletedSuccess": "User deleted",
     "cannotDeleteSelf": "You cannot delete your own account",
-    "readOnlyHint": "Email, role and verification status cannot be changed through the API.",
-    "roleNotice": "Changing a role is not available in the API — admins are created via seed or the database only."
+    "readOnlyHint": "Email and verification status cannot be changed through the API.",
+    "roleNotice": "You can manage user roles as an administrator."
   },
   "payment": {
+    "title": "Payments",
+    "subtitle": "All payments monitoring and settlements",
+    "id": "ID",
+    "order": "Order",
+    "amount": "Amount",
+    "provider": "Provider",
+    "statusLabel": "Status",
+    "transactionId": "Transaction ID",
+    "date": "Date",
+    "allProviders": "All providers",
+    "searchPlaceholder": "Search by ID, order or transaction...",
+    "totalCount": "Total: {{value}}",
+    "totalPaid": "Paid Revenue",
+    "pendingPayments": "Pending Payments",
+    "failedPayments": "Cancelled/Refunded",
+    "totalTransactions": "Total Operations",
+    "copyId": "Copy ID",
+    "copyTransaction": "Copy Transaction",
+    "noMatches": "No matching payments",
+    "noMatchesHint": "Try changing or resetting the filters.",
+    "empty": "No payments yet",
+    "emptyHint": "When customers pay for orders, they will appear here.",
     "status": {
       "PENDING": "Pending",
       "SUCCESSFUL": "Paid",
       "FAILED": "Failed",
       "REFUNDED": "Refunded"
+    },
+    "paymeStateLabel": "Payme state",
+    "performedAt": "Paid at",
+    "successfulCount": "{{count}} successful",
+    "pendingHint": "Waiting for Payme confirmation",
+    "failedHint": "Cancelled or refunded",
+    "totalTransactionsHint": "Transactions matching the filter",
+    "paymeState": {
+      "CREATED": "Created",
+      "PERFORMED": "Performed",
+      "CANCELLED": "Cancelled",
+      "CANCELLED_AFTER_PERFORM": "Refunded"
     }
   },
   "role": {
@@ -291,7 +363,13 @@
     "validation": {
       "nameRequired": "Enter category name",
       "nameExists": "A category with this name already exists"
-    }
+    },
+    "slugPlaceholder": "e.g. electronics",
+    "localizedHint": "Fill at least one language. Languages left empty stay unchanged.",
+    "isFeaturedHint": "Show among featured categories on the storefront",
+    "archiveCascadeHint": "The category will be archived together with its {{count}} products.",
+    "noMatches": "No categories match",
+    "emptyHint": "Add your first category — products are attached to categories."
   },
   "product": {
     "title": "Products",
@@ -374,6 +452,28 @@
       "categoryRequired": "Select category",
       "stockInvalid": "Stock quantity must not be negative",
       "discountInvalid": "Discount price must be less than base price"
+    },
+    "searchPlaceholder": "Search by name or description",
+    "slugPlaceholder": "e.g. cable-2m",
+    "localizedHint": "Fill at least one language. Languages left empty stay unchanged.",
+    "tagsPlaceholder": "comma separated: new, sale",
+    "priceOnRequest": "Price on request",
+    "priceOnRequestHint": "Price fields are locked and the product cannot be ordered.",
+    "priceOnRequestShort": "On request",
+    "attributesHint": "Each language is stored separately. Saving replaces all previous attributes.",
+    "noAttributes": "No attributes",
+    "attrUnit": "Unit",
+    "attrKeyPlaceholder": "e.g. Length",
+    "attrValuePlaceholder": "e.g. 2",
+    "attrUnitPlaceholder": "e.g. m",
+    "fiscal": {
+      "title": "Fiscalization",
+      "hint": "Used on the tax receipt. Left empty, the `.env` default applies.",
+      "ikpuCode": "IKPU code",
+      "packageCode": "Package code",
+      "vatPercent": "VAT (%)",
+      "units": "Units",
+      "fromEnv": "Default (.env)"
     }
   },
   "error": {

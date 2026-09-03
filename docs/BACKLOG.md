@@ -136,17 +136,43 @@ Backendda statistika endpointi yo'q — hammasi frontendda hisoblanadi.
 
 ---
 
+## Bosqich 11 — Backend 2.0 Integratsiyasi (docs/change2-front.md)
+
+- [x] **Auth Yangilanishi**:
+  - `POST /api/auth/login` javobidagi `{ user, access_token, refresh_token }` to'g'ridan-to'g'ri qabul qilinadi
+  - `POST /api/auth/forgot-password` va `POST /api/auth/reset-password` (OTP kod orqali parolni tiklash oqimi)
+  - `POST /api/auth/logout` chaqiruvi bilan tokenlarni xavfsiz bekor qilish
+- [x] **Dashboard Statistikasi**:
+  - `GET /api/dashboard/stats` integratsiyasi (umumiy tushum, to'langan tushum, buyurtmalar, mahsulotlar, foydalanuvchilar, oylik dinamika, top 5 mahsulotlar)
+  - Yangi `MonthlySalesChart` va `TopProducts` vidjetlari
+- [x] **Buyurtmalar Boshqaruvi**:
+  - `GET /api/orders/admin/all` da server-side pagination, status, qidiruv va start_date parametrlari
+  - `GET /api/orders/:id` detal endpointi
+  - `shipping_address`, `customer_phone`, `customer_name`, `notes`, `payment_method` maydonlari
+  - `PATCH /api/orders/:id/cancel` va `PATCH /api/orders/:id/archive` amallari
+- [x] **Foydalanuvchilar Boshqaruvi**:
+  - `GET /api/users` sahifalash, qidiruv va rol filtrlari
+  - `GET /api/users/stats` (jami va tasdiqlangan foydalanuvchilar soni)
+  - `PATCH /api/users/:id/role` — admin orqali foydalanuvchi rolini (USER / ADMIN) o'zgartirish
+- [x] **To'lovlar Monitoringi**:
+  - Yangi `/payments` moduli va sahifasi (`PaymentsPage`, `getPaymentColumns`, `usePayments`)
+  - `GET /api/payments/admin/all` (sahifalangan, status va provider filtri)
+  - KPI kartalari (to'langan tushum, kutilayotgan, bekor qilingan/qaytarilgan, umumiy tranzaksiyalar)
+- [x] **Ko'p Faylli Yuklash va O'chirish**:
+  - `POST /api/upload/multiple` (`uploadMultipleImages`)
+  - `DELETE /api/upload?path=...` (`deleteUploadedFile`)
+- [x] **i18n va Build**:
+  - `uz.json`, `ru.json`, `en.json` to'liq sinxronlashtirildi
+  - `npm run build` muvaffaqiyatli yakunlandi
+
+---
+
 ## Backendda yo'q — frontend qoplaydi
 
 Bular endpoint qidirib vaqt yo'qotmaslik uchun qayd etilgan:
 
 | Yetishmayotgan | Yechim |
 |---|---|
-| Dashboard statistikasi | Frontendda hisoblanadi |
-| `GET /api/users` sahifalashi | Frontendda cheklab ko'rsatiladi |
-| `GET /api/orders/admin/all` sahifalashi | Frontendda cheklab ko'rsatiladi |
-| Rolni o'zgartirish | Umuman yo'q — faqat seed/baza orqali |
-| Logout endpointi | `localStorage` tozalanadi |
 | Kategoriya nomi unikalligi | Frontendda tekshiriladi |
 | Buyurtma status ketma-ketligi | Frontendda cheklanadi |
 

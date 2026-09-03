@@ -34,12 +34,12 @@ export function useLogin() {
   })
 }
 
-/** Backend'da logout endpointi yo'q — tokenlar stateless. */
 export function useLogout() {
   const qc = useQueryClient()
   const navigate = useNavigate()
 
   return () => {
+    authApi.logout().catch(() => {})
     tokens.clear()
     qc.clear()
     navigate('/login', { replace: true })

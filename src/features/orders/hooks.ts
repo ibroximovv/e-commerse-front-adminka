@@ -1,27 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ordersApi } from './api'
+import { ordersApi, type OrderQueryParams } from './api'
 import type { OrderStatus } from '@/lib/types'
 
-/**
- * Kalit dashboard bilan bir xil (`['orders', 'admin']`) — ikkalasi ham aynan
- * shu endpointni oladi, shuning uchun bitta keshni bo'lishadi.
- */
-export function useOrders() {
+export function useOrders(params?: OrderQueryParams) {
   return useQuery({
-    queryKey: ['orders', 'admin'],
-    queryFn: ordersApi.list,
+    queryKey: ['orders', 'admin', params],
+    queryFn: () => ordersApi.list(params),
     placeholderData: (prev) => prev,
   })
 }
 
-/** Detal sahifasi uchun — alohida so'rov yo'q, ro'yxatdan topiladi. */
 export function useOrder(id?: string) {
-  const query = useOrders()
-
-  return {
-    ...query,
-    order: id ? query.data?.items.find((item) => item.id === id) : undefined,
-  }
+  return useQuery({
+    queryKey: ['order', id],
+    queryFn: () => ordersApi.getById(id!),
+    enabled: !!id,
+  })
 }
 
 export function useOrderMutations() {
@@ -31,7 +25,27 @@ export function useOrderMutations() {
     updateStatus: useMutation({
       mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
         ordersApi.updateStatus(id, status),
-      onSuccess: () => qc.invalidateQueries({ queryKey: ['orders'] }),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['orders'] })
+        qc.invalidateQueries({ queryKey: ['order'] })
+        qc.invalidateQueries({ queryKey: ['dashboard'] })
+      },
+    }),
+    cancel: useMutation({
+      mutationFn: (id: string) => ordersApi.cancel(id),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['orders'] })
+        qc.invalidateQueries({ queryKey: ['order'] })
+        qc.invalidateQueries({ queryKey: ['dashboard'] })
+      },
+    }),
+    archive: useMutation({
+      mutationFn: (id: string) => ordersApi.archive(id),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['orders'] })
+        qc.invalidateQueries({ queryKey: ['order'] })
+        qc.invalidateQueries({ queryKey: ['dashboard'] })
+      },
     }),
   }
 }

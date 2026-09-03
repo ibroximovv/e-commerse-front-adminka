@@ -1,7 +1,5 @@
-import { Badge } from 'dgz-ui/badge'
 import { Button } from 'dgz-ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from 'dgz-ui/card'
-import { Archive, ArchiveRestore, Edit, Package, Star, Flame, Sparkles, Trash2, Layers } from 'lucide-react'
+import { Archive, ArchiveRestore, Edit, Package, Star, Trash2, Layers } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { fileUrl } from '@/lib/api'
 import type { Product } from '@/lib/types'
@@ -31,102 +29,101 @@ export function ProductCard({
   const { t } = useTranslation()
   const firstImage = product.images?.[0]
 
-  // Use final_price as actual price, fallback to price
   const displayPrice = product.final_price ?? product.price
   const hasDiscount = (product.discount_percent ?? 0) > 0
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-all hover:border-brand/50 hover:shadow-md">
-      {/* Image header */}
+    <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-muted-foreground/40">
+      {/* Image Header with minimal badging */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
         {firstImage ? (
           <img
             src={fileUrl(firstImage)}
             alt={product.name}
-            className="size-full object-cover transition-transform duration-200 hover:scale-105"
+            className="size-full object-cover"
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-muted-foreground/50">
-            <Package className="size-10" />
+          <div className="flex size-full items-center justify-center text-muted-foreground/40">
+            <Package className="size-8" />
           </div>
         )}
 
         {/* Badges overlay */}
-        <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5 max-w-[85%]">
+        <div className="absolute left-2 top-2 flex flex-wrap items-center gap-1 max-w-[90%]">
           {hasDiscount && (
-            <span className="rounded-full bg-destructive px-2 py-0.5 text-xs font-bold text-destructive-foreground shadow-xs">
+            <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
               -{product.discount_percent}%
             </span>
           )}
           {product.is_top && (
-            <span className="flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-xs">
-              <Flame className="size-3" /> TOP
+            <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[9px] font-semibold text-white">
+              TOP
             </span>
           )}
           {product.is_featured && (
-            <span className="flex items-center gap-1 rounded-full bg-indigo-600 px-2 py-0.5 text-[11px] font-bold text-white shadow-xs">
-              <Sparkles className="size-3" /> Featured
+            <span className="rounded bg-blue-600 px-1.5 py-0.5 text-[9px] font-semibold text-white">
+              Featured
             </span>
           )}
-          {product.category?.name ? (
-            <Badge variant="gray" size="sm" rounded="full" className="backdrop-blur-md">
-              {product.category.name}
-            </Badge>
-          ) : null}
           {product.is_archived && (
-            <Badge type="status" variant="gray" size="sm" rounded="full">
+            <span className="rounded bg-zinc-600 px-1.5 py-0.5 text-[9px] font-medium text-white">
               {t('category.archived')}
-            </Badge>
+            </span>
           )}
         </div>
       </div>
 
-      <CardHeader className="p-4 pb-2">
+      {/* Card Body */}
+      <div className="flex flex-1 flex-col p-3.5">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3 className="line-clamp-1 text-base font-semibold text-foreground" title={product.name}>
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-xs font-semibold text-foreground" title={product.name}>
               {product.name}
             </h3>
             {product.brand && (
-              <span className="text-xs font-medium text-brand">{product.brand}</span>
+              <span className="text-[10px] text-muted-foreground">{product.brand}</span>
             )}
           </div>
           {product.sku && (
-            <span className="font-mono text-[11px] text-muted-foreground" title="SKU">
+            <span className="font-mono text-[10px] text-muted-foreground shrink-0" title="SKU">
               {product.sku}
             </span>
           )}
         </div>
 
         {product.description ? (
-          <p className="line-clamp-2 text-xs text-muted-foreground mt-1">
+          <p className="line-clamp-2 text-[11px] text-muted-foreground mt-1 leading-relaxed">
             {product.description}
           </p>
         ) : null}
-      </CardHeader>
 
-      <CardContent className="flex-1 p-4 pt-0">
-        <div className="mt-2 flex items-baseline justify-between gap-2">
-          <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-foreground">
-              {formatPrice(displayPrice)}
+        {/* Price & Stock Capsule */}
+        <div className="mt-auto pt-2.5 flex items-baseline justify-between gap-2">
+          {/* Narxsiz mahsulot savatga tushmaydi — 0 so'm ko'rsatish chalg'itadi */}
+          {product.price_on_request ? (
+            <span className="rounded-md bg-warning-muted px-2 py-0.5 text-[10px] font-medium text-warning">
+              {t('product.priceOnRequestShort')}
             </span>
-            {hasDiscount && (
-              <span className="text-xs text-muted-foreground line-through">
-                {formatPrice(product.price)}
+          ) : (
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm font-semibold tabular-nums text-foreground">
+                {formatPrice(displayPrice)}
               </span>
-            )}
-          </div>
+              {hasDiscount && (
+                <span className="text-[10px] text-muted-foreground line-through tabular-nums">
+                  {formatPrice(product.price)}
+                </span>
+              )}
+            </div>
+          )}
 
           <button
             type="button"
             onClick={() => onUpdateStock?.(product)}
-            className={`text-xs font-medium cursor-pointer hover:underline ${
-              product.stock > 5
-                ? 'text-success'
-                : product.stock > 0
-                ? 'text-warning font-semibold'
-                : 'text-destructive font-semibold'
+            className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+              product.stock > 0
+                ? 'bg-muted text-foreground'
+                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
             }`}
           >
             {product.stock > 0
@@ -135,87 +132,78 @@ export function ProductCard({
           </button>
         </div>
 
-        {/* Rating and Sales count */}
-        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-2">
+        {/* Reviews and Ratings Bar */}
+        <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground border-t border-border/40 pt-1.5">
           <button
             type="button"
             onClick={() => onViewReviews?.(product)}
             className="flex items-center gap-1 hover:text-foreground cursor-pointer"
           >
-            <Star className="size-3.5 fill-amber-400 text-amber-400" />
+            <Star className="size-3 text-amber-500 fill-amber-500" />
             <span className="font-medium text-foreground">{product.rating ?? 0}</span>
             <span>({product.rating_count ?? 0})</span>
           </button>
 
-          <div className="flex items-center gap-3 text-[11px]">
-            <span>{t('product.sales')}: {product.sales_count ?? 0}</span>
-            <span>Score: {product.popularity_score ?? 0}</span>
-          </div>
+          <span className="text-[10px]">
+            {product.sales_count ?? 0} ta sotildi
+          </span>
         </div>
+      </div>
 
-        {/* Tags / Attributes */}
-        {product.tags && product.tags.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {product.tags.slice(0, 3).map((tag, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center rounded-md bg-brand-muted px-1.5 py-0.5 text-[10px] font-medium text-brand"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </CardContent>
-
-      <CardFooter className="flex items-center justify-between border-t border-border bg-muted/20 p-2.5">
+      {/* Card Footer Actions */}
+      <div className="flex items-center justify-between border-t border-border bg-muted/10 px-2.5 py-1.5">
         <div className="flex items-center gap-1">
           {onToggleTop && (
-            <Button
+            <button
               type="button"
-              variant={product.is_top ? 'secondary' : 'ghost'}
-              size="icon"
               onClick={() => onToggleTop(product)}
               title="TOP Flag"
-              className={product.is_top ? 'text-amber-500' : ''}
+              className={`rounded px-1.5 py-0.5 text-[10px] font-semibold transition-colors ${
+                product.is_top
+                  ? 'bg-amber-500 text-white'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
             >
-              <Flame className="size-4" />
-            </Button>
+              TOP
+            </button>
           )}
           {onToggleFeatured && (
-            <Button
+            <button
               type="button"
-              variant={product.is_featured ? 'secondary' : 'ghost'}
-              size="icon"
               onClick={() => onToggleFeatured(product)}
               title="Featured Flag"
-              className={product.is_featured ? 'text-indigo-600' : ''}
+              className={`rounded px-1.5 py-0.5 text-[10px] font-semibold transition-colors ${
+                product.is_featured
+                  ? 'bg-blue-600 text-white'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
             >
-              <Sparkles className="size-4" />
-            </Button>
+              FT
+            </button>
           )}
           {onUpdateStock && (
-            <Button
+            <button
               type="button"
-              variant="ghost"
-              size="icon"
               onClick={() => onUpdateStock(product)}
               title={t('product.updateStock')}
+              className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              <Layers className="size-4" />
-            </Button>
+              <Layers className="size-3.5" />
+            </button>
           )}
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <Button
             type="button"
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => onEdit(product)}
             title={t('common.edit')}
+            className="rounded h-6 px-1.5 text-xs font-normal"
           >
-            <Edit className="size-4" />
+            <Edit className="size-3 mr-1" />
+            {t('common.edit')}
           </Button>
 
           <Button
@@ -224,11 +212,12 @@ export function ProductCard({
             size="icon"
             onClick={() => onToggleArchive(product)}
             title={product.is_archived ? t('category.unarchive') : t('category.archive')}
+            className="rounded size-6"
           >
             {product.is_archived ? (
-              <ArchiveRestore className="size-4 text-brand" />
+              <ArchiveRestore className="size-3 text-brand" />
             ) : (
-              <Archive className="size-4 text-warning" />
+              <Archive className="size-3 text-muted-foreground" />
             )}
           </Button>
 
@@ -238,12 +227,12 @@ export function ProductCard({
             size="icon"
             onClick={() => onDelete(product)}
             title={t('common.delete')}
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="rounded size-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-3" />
           </Button>
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
 }

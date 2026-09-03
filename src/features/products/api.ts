@@ -1,5 +1,5 @@
-import { del, get, getList, patch, post } from '@/lib/api'
-import type { Product, Review, ReviewSummary } from '@/lib/types'
+import { del, get, getList, getRaw, patch, post } from '@/lib/api'
+import type { Product, ProductFacets, ProductRaw, Review, ReviewSummary } from '@/lib/types'
 import type {
   ProductFilters,
   ProductFlagsInput,
@@ -21,7 +21,14 @@ export const productsApi = {
 
   byId: (id: string) => get<Product>(`/api/products/${id}`),
 
+  /** Tahrirlash formasi uchun: `name_uz`/`name_ru`/`name_en` va ko'p tilli atributlar. */
+  byIdRaw: (id: string) => getRaw<ProductRaw>(`/api/products/${id}`),
+
   bySlug: (slug: string) => get<Product>(`/api/products/slug/${slug}`),
+
+  /** Filtr paneli uchun fasetlar. Filtrga `key`/`value` ketadi, `label` — faqat ekranga. */
+  facets: (filters: ProductFilters = {}) =>
+    get<ProductFacets>('/api/products/filters', filters),
 
   create: (body: ProductInput) => post<Product>('/api/products', body),
 

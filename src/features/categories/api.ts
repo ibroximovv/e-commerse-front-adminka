@@ -1,5 +1,5 @@
-import { del, get, getList, patch, post } from '@/lib/api'
-import type { Category, CategoryBreadcrumb } from '@/lib/types'
+import { del, get, getList, getRaw, patch, post } from '@/lib/api'
+import type { Category, CategoryRaw } from '@/lib/types'
 import type { CategoryFilters, CategoryInput, CategoryUpdateInput } from './types'
 
 export const categoriesApi = {
@@ -14,17 +14,20 @@ export const categoriesApi = {
     return getList<Category>('/api/categories', queryParams)
   },
 
-  tree: (params?: {
-    with_product_count?: boolean
-    root_id?: string
-    include_archived?: boolean
-  }) => get<Category[]>('/api/categories/tree', params),
+  /**
+   * Sahifalashsiz to'liq ro'yxat — selectlar va menyu uchun.
+   * Avvalgi `/tree` ning o'rnini bosadi: katalog tekis, javob `sort_order`
+   * bo'yicha tartiblangan, rekursiv render kerak emas.
+   */
+  all: (params?: { with_product_count?: boolean; include_archived?: boolean }) =>
+    get<Category[]>('/api/categories/all', params),
 
   byId: (id: string) => get<Category>(`/api/categories/${id}`),
 
-  bySlug: (slug: string) => get<Category>(`/api/categories/slug/${slug}`),
+  /** Tahrirlash formasi uchun: `name_uz`/`name_ru`/`name_en` bilan. */
+  byIdRaw: (id: string) => getRaw<CategoryRaw>(`/api/categories/${id}`),
 
-  breadcrumbs: (id: string) => get<CategoryBreadcrumb[]>(`/api/categories/${id}/breadcrumbs`),
+  bySlug: (slug: string) => get<Category>(`/api/categories/slug/${slug}`),
 
   create: (body: CategoryInput) => post<Category>('/api/categories', body),
 

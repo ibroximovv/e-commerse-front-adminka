@@ -1,15 +1,16 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { setApiLanguage } from '@/lib/api'
 import type { Language } from '@/lib/types'
 import en from './locales/en.json'
 import ru from './locales/ru.json'
 import uz from './locales/uz.json'
 
 /*
- * Bu — INTERFEYS tili. API so'rovlaridagi `ln` parametri bilan aralashtirmang:
- * u doim `en` bo'ladi (lib/api.ts ga qarang), aks holda backend `name`/
- * `description` maydonlarini tarjima qilib yuboradi va tahrirlashda ma'lumot
- * buziladi.
+ * Interfeys tili VA API `?ln` parametri endi bitta manbadan boshqariladi:
+ * backend tarjimani bazadan beradi, ya'ni ro'yxatlar foydalanuvchi tilida
+ * keladi. Tahrirlash formalari buni chetlab o'tadi — ular `?raw=true` bilan
+ * uchala tilni oladi (`lib/api.ts` dagi `getRaw`).
  */
 
 export const LANGUAGES: Language[] = ['uz', 'ru', 'en']
@@ -24,9 +25,12 @@ export function storedLanguage(): Language {
 
 export function setLanguage(language: Language) {
   localStorage.setItem(STORAGE_KEY, language)
+  setApiLanguage(language)
   void i18n.changeLanguage(language)
   document.documentElement.lang = language
 }
+
+setApiLanguage(storedLanguage())
 
 void i18n.use(initReactI18next).init({
   resources: {

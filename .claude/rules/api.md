@@ -8,31 +8,53 @@ Manba: `../e-commerse/docs/admin-frontend.md`. Bu fayl — amaliy qisqartma.
 - Barcha yo'llar `/api/...` bilan boshlanadi
 - Statik fayllar: `<BASE_URL>/uploads/<fayl>`
 
-## 1. `ln=en` — majburiy
+## 1. Til: `ln` — ro'yxatlarga, `raw=true` — formalarga
 
-Backend javoblarni tarjima qiladi. Standart til `uz`, ya'ni `ln` yubormasangiz `name`, `description`, `message`, `error`, `full_name` maydonlari lug'atdagi so'zlarga almashtirilib keladi.
+Backend `name`, `description`, atribut `key`/`value`/`unit` maydonlarini **bazadagi** tarjimadan qaytaradi. Til tanlash tartibi: `?ln=uz|ru|en` → JWT dagi `user.language` → `uz`.
 
-Adminkada bu ma'lumot yo'qotadi: tahrirlash formasiga tarjima qilingan qiymat tushadi, saqlasangiz bazadagi asl nom buziladi.
-
-`lib/api.ts` interceptorida markazlashgan:
+`ln` `lib/api.ts` interceptorida markazlashgan va **interfeys tiliga ergashadi**:
 
 ```ts
-config.params = { ln: 'en', ...(config.params ?? {}) };
+let apiLanguage: Language = 'uz'          // i18n/index.ts `setApiLanguage()` bilan yangilaydi
+config.params = { ln: apiLanguage, ...(config.params ?? {}) }
 ```
 
-**Shu sababli har doim `lib/api.ts` dagi instance orqali so'rov yuboring.** Chetlab o'tilgan `axios`/`fetch` chaqiruvi jimgina buzilgan ma'lumot beradi.
+> Ilgari bu qiymat `'en'` ga qotirilgan edi, chunki tarjima lug'at orqali qilinardi va tahrirlash formasiga tarjima qilingan nom tushib, saqlaganda bazadagi asl nom buzilardi. **Endi bunday emas** — tarjima bazadan keladi.
 
-> UI tili (i18next, uz/ru/en) bilan aralashtirmang — ular butunlay boshqa narsa. UI qanday tilda bo'lishidan qat'i nazar API `ln=en` oladi.
+**Tahrirlash formasi doim `?raw=true` bilan yuklansin.** U bitta tarjima o'rniga `name_uz`/`name_ru`/`name_en` (va `description_*`, atributlarda `key_*`/`value_*`/`unit_*`) qaytaradi — ya'ni forma boshqa tillarni ustidan yozib yubormaydi.
 
-## 2. Javob konverti
+| Nima | Chaqiruv |
+|---|---|
+| Ro'yxat, jadval, tanlov (select) | `get` / `getList` — `raw` **yo'q** |
+| Tahrirlash modali | `getRaw` (`?raw=true`) → `useCategoryRaw`, `useProductRaw` |
+
+`raw` javobini `lib/localized.ts` yordamchilari ochadi: `fromRaw(raw, 'name')` → `{ uz, ru, en }`, `cleanLocalized()` esa bo'sh tillarni tashlab yuboradi.
+
+> Til almashganda TanStack Query keshi eskiradi — `useChangeLanguage()` shu sababli `qc.invalidateQueries()` chaqiradi. Tilni to'g'ridan-to'g'ri `setLanguage()` bilan almashtirmang (login sahifasidan tashqari — u yerda hali kesh yo'q).
+
+## 2. Ko'p tilli yozish
+
+`name` va `description` **obyekt** sifatida yuboriladi:
+
+```ts
+{ name: { uz: 'Kabel', ru: 'Кабель' } }   // en tegilmaydi
+```
+
+- `name` uchun kamida bitta til to'ldirilgan bo'lishi shart (`hasAnyLocale`).
+- PATCH da **yuborilmagan til o'zgarmaydi**.
+- Bo'sh satr = "to'ldirilmagan", tozalash emas. Tarjimani o'chirish uchun alohida yo'l yo'q.
+
+## 3. Javob konverti
 
 Muvaffaqiyatli javob:
 
 ```jsonc
-{ "success": true, "data": {...}, "message": null, "meta": null }
+{ "success": true, "data": {...}, "language": "uz" }
 ```
 
-`meta` faqat sahifalanadigan ro'yxatda (**hozircha faqat `GET /api/products`**):
+⚠️ `message` va `meta` bo'sh bo'lsa **`null` emas, umuman yo'q** — `res.message ?? ''` kabi ixtiyoriy o'qish ishlating, `res.message === null` tekshiruvi endi ishlamaydi.
+
+`meta` faqat sahifalanadigan ro'yxatda:
 
 ```jsonc
 { "meta": { "total": 25, "page": 1, "limit": 10, "totalPages": 3 } }
@@ -43,12 +65,16 @@ Konvert `lib/api.ts` yordamchilarida ochiladi — komponentlarda `res.data.data`
 | Yordamchi | Qaytaradi |
 |---|---|
 | `get<T>(url, params)` | `T` |
-| `getList<T>(url, params)` | `{ items: T[], meta? }` |
+| `getRaw<T>(url, params)` | `T` — `?raw=true` bilan, faqat tahrirlash formalari uchun |
+| `getList<T>(url, params)` | `{ items: T[], meta?, language? }` |
 | `post/patch/del<T>(...)` | `T` |
 | `toPagination(items, meta)` | `DataTable` uchun `{ docs, page, limit, total, totalPages }` |
+| `paginateLocal(items, page, limit)` | server sahifalamaydigan ro'yxatlar uchun |
 | `fileUrl(path)` | `"uploads/x.png"` → `"http://localhost:3000/uploads/x.png"` |
 
-## 3. Xatolar
+**Har doim `lib/api.ts` dagi instance orqali so'rov yuboring.** Chetlab o'tilgan `axios`/`fetch` da `ln` ham, token ham, refresh ham yo'q.
+
+## 4. Xatolar
 
 ```jsonc
 { "success": false, "statusCode": 400, "error": "Bad Request",
@@ -64,58 +90,75 @@ throw new Error(Array.isArray(raw) ? raw.join(', ') : raw);
 
 500 xatolarida `message` ichida Prisma'ning xom xatosi (server fayl yo'llari bilan) kelishi mumkin — foydalanuvchiga ko'rsatmang, umumiy xabar bering.
 
-## 4. Auth
+## 5. Auth
 
 | Metod | Yo'l | Izoh |
 |---|---|---|
-| POST | `/api/auth/login` | `{ email, password }` → `{ access_token, refresh_token }` |
+| POST | `/api/auth/login` | `{ email, password }` → `{ user, access_token, refresh_token }` |
 | POST | `/api/auth/refresh` | `{ refresh_token }` → yangi juftlik |
+| POST | `/api/auth/forgot-password` | `{ email }` → parolni tiklash kodi yuboriladi |
+| POST | `/api/auth/reset-password` | `{ email, code, new_password }` → yangi parol o'rnatiladi |
+| POST | `/api/auth/logout` | Tokenlarni bekor qilish va tizimdan chiqish |
 | POST | `/api/auth/change-password` | `{ old_password, new_password }`, token kerak |
 | GET | `/api/users/profile` | Joriy foydalanuvchi — **rolni shu yerdan oling** |
 
 - `access_token` — 15 daqiqa. `refresh_token` — 7 kun.
-- Rolni token'ni `atob()` qilib emas, `GET /api/users/profile` orqali tekshiring — bazadagi haqiqiy holatni beradi.
-- **Logout endpointi yo'q** — tokenlar stateless. Chiqish = `localStorage` tozalash.
+- Login to'g'ridan-to'g'ri `user` obyektini qaytaradi (avvalgi faqat tokenlar o'rniga).
 - Login rad etilishi: 401 `Invalid credentials` · 401 `Account not verified` · 403 `Forbidden resource` (roli ADMIN emas).
 - Refresh oqimi bir martalik navbat bilan (`refreshing` promise) — parallel 401'lar bitta refresh kutadi.
 
-## 5. Endpointlar
+## 6. Endpointlar
 
 🔓 ochiq · 🔑 token · 👑 faqat ADMIN
 
+**Dashboard** `/api/dashboard` — GET `/stats` 👑 (umumiy tushum, to'langan tushum, buyurtmalar, mahsulotlar, foydalanuvchilar, oylik dinamika, top 5 mahsulotlar)
+
 **Products** `/api/products` — GET 🔓 (sahifalash + `meta`), GET `/:id` 🔓, POST 👑, PATCH `/:id` 👑, DELETE `/:id` 👑
 
-Query: `page`, `limit`, `search`, `category_id`, `min_price`, `max_price`, `sortBy` (`name|price|stock|created_at`), `sortOrder` (`asc|desc`), `all`.
+Query: `page`, `limit`, `search`, `category_id`, `min_price`, `max_price`, `sortBy` (`name|price|stock|created_at`), `sortOrder` (`asc|desc`), `all`, `price_on_request`.
+
+- `search` uchala tilda ham qidiradi — interfeys tiliga qarab natija yo'qolmaydi.
+- `include_descendants` **olib tashlangan** (kategoriyalar endi tekis).
 
 > ⚠️ **`all=false` yubormang** — backend bug'i tufayli `true` kabi ishlaydi va arxivlanganlarni ham qaytaradi. Arxivlanganlar kerak bo'lmasa parametrni **umuman qo'shmang**. Adminkada odatda `all=true` kerak.
 
-Body: `{ name, description?, price: number, stock?, images?: string[], category_id, attributes?: [{key, value}] }`. PATCH da hammasi ixtiyoriy + `is_archived?`.
+Body: `{ name: {uz,ru,en}, description?, price: number, stock?, images?, category_id, tags?, attributes?, price_on_request?, ikpu_code?, package_code?, vat_percent?, units? }`. PATCH da hammasi ixtiyoriy + `is_archived?`.
 
-> `price` — `Float`. `Number` yuboring, string emas (`"999.99"` validatsiyadan o'tmaydi).
+- `price` — `Float`. `Number` yuboring, string emas (`"999.99"` validatsiyadan o'tmaydi).
+- `price_on_request: true` bo'lsa narx maydonlari bloklanadi va mahsulotni buyurtma qilib bo'lmaydi.
+- `attributes` — `[{ key: {uz,ru,en}, value: {…}, unit?: {…} }]`. **PATCH da massiv to'liq almashtiriladi**, shuning uchun tahrirlashda hamma qatorni qayta yuboring. O'lchov birligini `key` ichiga yozmang (`"Uzunlik (m)"` ❌) — `unit` alohida. Sonli qiymat uchala tilda bir xil bo'lsin, aks holda faset ikkiga bo'linadi.
+- Fiskalizatsiya: `vat_percent` faqat `0` yoki `12`; yuborilmasa `.env` dagi standart ishlatiladi.
 
-**Categories** `/api/categories` — GET 🔓 (`?all=true` arxivlanganlar bilan), GET `/:id` 🔓, POST/PATCH/DELETE 👑. Sahifalash yo'q.
+Faset atributlari `key` (filtrlash uchun barqaror kalit) va `label` (ko'rsatish uchun tarjima) ga bo'lingan. **Filtrga `key` yuboring, ekranga `label` chizing** — aralashtirsangiz til almashganda tanlangan filtr yo'qoladi.
 
-> ⚠️ `name` schema'da `@unique`, lekin MongoDB'da indeks amalda yaratilmagan — takrorlanish bemalol o'tadi. **Saqlashdan oldin mavjud ro'yxatdan qidiring.**
-> ⚠️ Kategoriyani o'chirsangiz mahsulotlarning `category_id` si osilib qoladi (MongoDB'da FK yo'q). `PATCH { is_archived: true }` ishlating.
+**Categories** `/api/categories` — GET 🔓 (`?all=true` arxivlanganlar bilan), GET `/all` 🔓 (menyu va select uchun, sahifalashsiz), GET `/:id` 🔓, POST/PATCH/DELETE 👑. Sahifalash yo'q.
 
-**Users** `/api/users` — GET `/profile` 🔑, PATCH `/profile` 🔑, GET 👑 (**sahifalashsiz**), GET `/:id` 👑, PATCH `/:id` 👑, DELETE `/:id` 👑
+Katalog **tekis**: `parent_id`, `children`, `breadcrumbs`, `GET /tree`, `GET /:id/breadcrumbs`, `?root_only`, `?parent_id` — hammasi olib tashlangan.
 
-Tahrirlanadigan maydonlar faqat: `full_name`, `phone`, `photo`, `language`. **`role` yo'q** — API orqali admin yaratib bo'lmaydi, faqat seed yoki baza orqali. `language` ∈ `uz|ru|en`.
+- Kategoriya arxivlansa **ichidagi mahsulotlar ham arxivlanadi** — tasdiqlash dialogida shuni aytib qo'ying.
+- Mahsuloti bor kategoriyani o'chirib bo'lmaydi (400).
 
-**Orders** `/api/orders` — GET `/admin/all` 👑 (ichida `user`, `items.product`, `payment`; **sahifalash yo'q**), GET `/:id` 🔑, PATCH `/:id/status` 👑 `{ status }`
+**Users** `/api/users` — GET `/profile` 🔑, PATCH `/profile` 🔑, GET 👑 (`?page=1&limit=10&role=USER&search=...`), GET `/stats` 👑, GET `/:id` 👑, PATCH `/:id` 👑, PATCH `/:id/role` 👑 (`{ role: 'ADMIN' | 'USER' }`), DELETE `/:id` 👑
 
-Status: `PENDING` → `CONFIRMED` → `SHIPPED` → `DELIVERED`, yoki `CANCELLED`. **Backend ketma-ketlikni tekshirmaydi** — `DELIVERED` dan `PENDING` ga ham qaytaradi. Mantiqni frontend cheklaydi.
+Tahrirlanadigan maydonlar: `full_name`, `phone`, `photo`, `language`. Admin tomonidan rol o'zgartirish `PATCH /api/users/:id/role` orqali amalga oshiriladi. `language` ∈ `uz|ru|en`.
 
-**Payments** `/api/payments` — GET `/status/:order_id` 🔑. Statuslar: `PENDING`, `SUCCESSFUL`, `FAILED`, `REFUNDED`. To'lov muvaffaqiyatli bo'lsa buyurtma avtomat `CONFIRMED` ga o'tadi. To'lov hozircha **mock**.
+**Orders** `/api/orders` — GET `/admin/all` 👑 (`?page=1&limit=10&status=...&search=...&start_date=...`), GET `/:id` 🔑, PATCH `/:id/status` 👑 `{ status }`, PATCH `/:id/cancel` 👑, PATCH `/:id/archive` 👑
 
-> Adminkada to'lov tugmasi **qo'ymang** — `POST /api/payments` faqat o'z buyurtmasi uchun ishlaydi.
+Model: `user`, `items.product`, `payment`, `shipping_address`, `customer_phone`, `customer_name`, `notes`, `payment_method`, `is_archived`.
 
-**Upload** `POST /api/upload` 🔑 — `multipart/form-data`, maydon nomi **`file`**, faqat rasm (`jpg|jpeg|png|gif|webp`), maks **5MB**. Javob: `{ url: "uploads/1712345678-123.png" }`.
+**Payments** `/api/payments` — GET `/admin/all` 👑 (`?page=1&limit=10&status=...&provider=...&search=...`), GET `/status/:order_id` 🔑. Statuslar: `PENDING`, `SUCCESSFUL`, `FAILED`, `REFUNDED`.
 
-> `url` **nisbiy** va boshida `/` yo'q. Bazaga aynan shu nisbiy yo'lni saqlang, ko'rsatishda `fileUrl()` bilan to'liq manzilga aylantiring.
-> ⚠️ Instance'da global `Content-Type: application/json` bor — upload'da uni **o'chirish** kerak, aks holda FormData boundary buziladi.
+Payme maydonlari: `payme_transaction_id` (avvalgi `transaction_id`), `payme_state`, `payme_create_time` / `payme_perform_time` / `payme_cancel_time` (**millisekundlik timestamp**, ISO satr emas), `payme_reason`.
 
-## 6. TanStack Query konvensiyasi
+`payme_state`: `CREATED` · `PERFORMED` · `CANCELLED` · `CANCELLED_AFTER_PERFORM`.
+
+> `status` yolg'iz yetarli emas: bekor qilingan to'lov ham, qaytarilgan pul ham `FAILED` bo'lib keladi — farqi faqat `payme_state` da. Shuning uchun ro'yxatda ikkalasi ham ko'rsatiladi (`PaymeStateBadge`).
+
+> Adminkada to'lov tugmasi **qo'ymang**. Eski `POST /api/payments` o'chirilgan; o'rniga `POST /api/payments/checkout` → `checkout_url`, u faqat mijozning o'z buyurtmasi uchun ishlaydi. Monitoring sahifasi `/payments` orqali kuzatiladi.
+
+**Upload** — `POST /api/upload` 🔑 (`file`), `POST /api/upload/multiple` 🔑 (`files` - 10 tagacha), `DELETE /api/upload?path=...` 🔑.
+
+## 7. TanStack Query konvensiyasi
 
 Query key — massiv, birinchi element resurs nomi:
 
@@ -123,19 +166,19 @@ Query key — massiv, birinchi element resurs nomi:
 ['profile']
 ['products', filters]
 ['product', id]
-['categories', { all: true }]
-['orders']
+['product', id, 'raw']        // tahrirlash formasi — ?raw=true
+['categories', filters]
+['categories', 'all', params] // GET /api/categories/all
+['category', id, 'raw']
+['orders', 'admin', filters]
+['payments', 'admin', filters]
+['dashboard', 'stats']
+['users', 'list', filters]
+['users', 'stats']
 ```
 
-Mutatsiyadan keyin `qc.invalidateQueries({ queryKey: ['products'] })`.
+Mutatsiyadan keyin `qc.invalidateQueries({ queryKey: [...] })`.
+
+`'raw'` kalitini oxiriga qo'ying — shunda `['product', id]` prefiksi bilan invalidatsiya ikkalasini ham yangilaydi.
 
 Sahifa almashganda "sakramaslik" uchun: `placeholderData: (prev) => prev`.
-
-## 7. Backendda yo'q narsalar
-
-Bularni frontend hisoblaydi — endpoint qidirmang:
-
-- **Dashboard statistikasi** — `GET /api/orders/admin/all` ni olib, statuslar bo'yicha frontendda sanang. Jami mahsulot soni: `GET /api/products?all=true&limit=1` → `meta.total`.
-- **Foydalanuvchi rolini o'zgartirish** — umuman yo'q.
-- **Logout** — yo'q.
-- **`GET /api/users` va `GET /api/orders/admin/all` da sahifalash** — yo'q, ma'lumot ko'paysa sekinlashadi. Frontendda cheklab ko'rsating.

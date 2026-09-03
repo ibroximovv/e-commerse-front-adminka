@@ -11,12 +11,11 @@
   --primary-foreground: var(--color-neutral-0);
   --brand-foreground: #ffffff;
 
-  --radius: 0.75rem;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) - 3px);
+  --radius-md: calc(var(--radius) - 1px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-xl: calc(var(--radius) + 3px);
 
   --brand: var(--color-blue-600);
   --brand-muted: var(--color-blue-50);
@@ -87,6 +86,7 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
   }
 
   body {
@@ -96,6 +96,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.011em;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-brand) 20%, transparent);
+    color: var(--color-foreground);
   }
 
   :focus-visible {
@@ -103,19 +109,18 @@
     outline-offset: 2px;
   }
 
-  /* Universal font inheritance for inputs, buttons, selects, tables */
   input, button, select, textarea, table {
     font-family: inherit;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-neutral-alpha-6) transparent;
+    scrollbar-color: var(--color-neutral-alpha-5) transparent;
   }
 
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 5px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track {
@@ -123,29 +128,27 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: var(--color-neutral-alpha-5);
-    border: 2px solid transparent;
+    background-color: var(--color-neutral-alpha-4);
     border-radius: 9999px;
-    background-clip: content-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--color-neutral-alpha-8);
+    background-color: var(--color-neutral-alpha-7);
   }
 }
 
-/* ── Ideal Data Table Typography & State Overrides ────────────────────────── */
+/* ── Minimalist Clean Data Table Styling ────────────────────────── */
 
 /* Container card wrapper */
 .dgz-datatable-container,
 div[class*="datatable"],
 div[class*="table-wrapper"],
 div[class*="border-border-alpha-light"] {
-  border-radius: 1rem !important;
-  border: 1px solid var(--color-neutral-alpha-3) !important;
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--color-border) !important;
   background: var(--color-card) !important;
   overflow: hidden !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02) !important;
+  box-shadow: none !important;
 }
 
 /* Table Responsive Horizontal Scrolling */
@@ -153,7 +156,7 @@ div[class*="datatable"] table,
 div[class*="table-wrapper"] table,
 .dgz-datatable-container table {
   width: 100% !important;
-  min-width: 720px !important;
+  min-width: 700px !important;
   table-layout: auto !important;
 }
 
@@ -166,63 +169,71 @@ div[class*="table-wrapper"] > div:nth-child(2) {
 /* Table Toolbar / Top Controls Bar */
 div[class*="datatable"] > div:first-child,
 div[class*="table-wrapper"] > div:first-child {
-  padding: 0.875rem 1.25rem !important;
+  padding: 0.75rem 1rem !important;
   background: var(--color-card) !important;
-  border-bottom: 1px solid var(--color-neutral-alpha-2) !important;
+  border-bottom: 1px solid var(--color-border) !important;
 }
 
-/* Search Input */
+/* Search Input inside DataTable */
 div[class*="Search"] input,
 input[placeholder*="search" i],
 input[placeholder*="qidir" i] {
-  border-radius: 0.75rem !important;
+  border-radius: var(--radius-sm) !important;
   border: 1px solid var(--color-input) !important;
-  background: var(--color-card) !important;
-  padding-left: 0.875rem !important;
-  padding-right: 2rem !important;
+  background: var(--color-background) !important;
+  padding-left: 0.75rem !important;
+  padding-right: 1.5rem !important;
   font-size: 0.8125rem !important;
+  transition: border-color 0.15s ease !important;
+}
+
+div[class*="Search"] input:focus,
+input[placeholder*="search" i]:focus,
+input[placeholder*="qidir" i]:focus {
+  border-color: var(--color-brand) !important;
+  outline: none !important;
 }
 
 /* Header Row & Cells */
 table thead {
   background: var(--color-neutral-alpha-2) !important;
-  border-bottom: 1px solid var(--color-neutral-alpha-3) !important;
+  border-bottom: 1px solid var(--color-border) !important;
 }
 
 table thead th {
   color: var(--color-muted-foreground) !important;
   font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.04em !important;
-  text-transform: uppercase !important;
-  padding: 0.75rem 0.875rem !important;
-  border-bottom: 1px solid var(--color-neutral-alpha-3) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+  padding: 0.625rem 0.875rem !important;
+  border-bottom: 1px solid var(--color-border) !important;
   white-space: nowrap !important;
 }
 
 /* Header Column Filter Inputs */
 table thead th input {
-  margin-top: 0.375rem !important;
-  height: 1.875rem !important;
+  margin-top: 0.25rem !important;
+  height: 1.75rem !important;
   width: 100% !important;
-  border-radius: 0.5rem !important;
+  border-radius: var(--radius-sm) !important;
   border: 1px solid var(--color-input) !important;
   background: var(--color-card) !important;
-  padding: 0.25rem 0.5rem !important;
+  padding: 0.125rem 0.5rem !important;
   font-size: 0.75rem !important;
   font-weight: 400 !important;
   text-transform: none !important;
   color: var(--color-foreground) !important;
 }
 
-/* Table Body Rows */
-table tbody tr {
-  transition: background-color 0.15s ease !important;
-  border-bottom: 1px solid var(--color-neutral-alpha-2) !important;
+table thead th input:focus {
+  border-color: var(--color-brand) !important;
+  outline: none !important;
 }
 
-table tbody tr:nth-child(even) {
-  background-color: var(--color-neutral-alpha-1) !important;
+/* Table Body Rows */
+table tbody tr {
+  transition: background-color 0.1s ease !important;
+  border-bottom: 1px solid var(--color-neutral-alpha-2) !important;
 }
 
 table tbody tr:last-child {
@@ -230,7 +241,7 @@ table tbody tr:last-child {
 }
 
 table tbody tr:hover {
-  background-color: var(--color-neutral-alpha-3) !important;
+  background-color: var(--color-neutral-alpha-2) !important;
 }
 
 table tbody tr[data-state="selected"] {
@@ -239,7 +250,7 @@ table tbody tr[data-state="selected"] {
 
 /* Table Cells */
 table tbody td {
-  padding: 0.75rem 0.875rem !important;
+  padding: 0.625rem 0.875rem !important;
   font-size: 0.8125rem !important;
   line-height: 1.25rem !important;
   color: var(--color-foreground) !important;
@@ -252,55 +263,37 @@ table th:first-child {
   font-family: var(--font-mono) !important;
   color: var(--color-muted-foreground) !important;
   font-size: 0.75rem !important;
-  font-weight: 500 !important;
 }
 
 /* Footer Pagination Bar */
 div[class*="datatable"] > div:last-child,
 div[class*="table-wrapper"] > div:last-child {
-  padding: 0.75rem 1.25rem !important;
+  padding: 0.625rem 1rem !important;
   background: var(--color-card) !important;
-  border-top: 1px solid var(--color-neutral-alpha-2) !important;
+  border-top: 1px solid var(--color-border) !important;
   font-size: 0.8125rem !important;
   color: var(--color-muted-foreground) !important;
 }
 
-/* ── Apple iOS HIG Toast Notifications Overrides ───────────────────────── */
+/* ── Minimalist Toast Notifications ───────────────────────── */
 
 .Toastify__toast-container {
-  padding: 1rem !important;
+  padding: 0.75rem !important;
   width: auto !important;
-  max-width: 420px !important;
+  max-width: 380px !important;
 }
 
 .Toastify__toast {
-  border-radius: 1rem !important;
-  border: 1px solid var(--color-neutral-alpha-3) !important;
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--color-border) !important;
   background: var(--color-card) !important;
   color: var(--color-foreground) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
-  backdrop-filter: blur(16px) !important;
-  padding: 0.875rem 1.125rem !important;
-  margin-bottom: 0.625rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 0.5rem !important;
   font-family: var(--font-sans) !important;
-  font-size: 0.875rem !important;
+  font-size: 0.8125rem !important;
   font-weight: 500 !important;
-}
-
-.Toastify__toast--success {
-  border-left: 4px solid #10b981 !important;
-}
-
-.Toastify__toast--error {
-  border-left: 4px solid #f43f5e !important;
-}
-
-.Toastify__toast--warning {
-  border-left: 4px solid #f59e0b !important;
-}
-
-.Toastify__toast--info {
-  border-left: 4px solid #3b82f6 !important;
 }
 
 .Toastify__toast-body {
@@ -310,7 +303,7 @@ div[class*="table-wrapper"] > div:last-child {
 
 .Toastify__close-button {
   color: var(--color-muted-foreground) !important;
-  opacity: 0.7 !important;
+  opacity: 0.6 !important;
 }
 
 .Toastify__close-button:hover {

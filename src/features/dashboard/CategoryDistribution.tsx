@@ -1,6 +1,12 @@
 import { Tags } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { CategoryStat } from './hooks'
+
+export interface CategoryStat {
+  id: string
+  name: string
+  count: number
+  percent: number
+}
 
 export function CategoryDistribution({
   categoryStats,

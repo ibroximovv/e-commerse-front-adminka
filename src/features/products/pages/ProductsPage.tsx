@@ -2,8 +2,9 @@ import { Button } from 'dgz-ui/button'
 import { DataTable } from 'dgz-ui-shared/components/datatable'
 import { MyPagination } from 'dgz-ui-shared/components/pagination'
 import { useDocumentTitle } from 'dgz-ui-shared/hooks'
-import { Flame, LayoutGrid, List, Package, Plus, Search, Sparkles, Archive } from 'lucide-react'
+import { LayoutGrid, List, Package, Plus, Archive } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { getProductColumns } from '../components/columns'
@@ -16,19 +17,49 @@ import type { ProductFilters } from '../types'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { EmptyState, ErrorState, Skeleton, TableSkeleton } from '@/components/ui/States'
 import { ConfirmModal, type ConfirmOptions } from '@/components/ui/ConfirmModal'
+import { NativeSelect, SearchInput } from '@/components/ui/Field'
+import { Segmented } from '@/components/ui/Segmented'
 import { toPagination } from '@/lib/api'
 import type { Product, ProductSortPreset } from '@/lib/types'
-import { errorMessage } from '@/lib/utils'
-import { useCategoryTree } from '@/features/categories/hooks'
+import { cn, errorMessage } from '@/lib/utils'
+import { useAllCategories } from '@/features/categories/hooks'
+
+/** Filtr paneli uchun yoqib/o'chiriladigan chip. */
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors',
+        active
+          ? 'border-brand bg-brand-muted text-brand'
+          : 'border-border bg-card text-muted-foreground hover:text-foreground',
+      )}
+    >
+      {children}
+    </button>
+  )
+}
 
 export function ProductsPage() {
   const { t } = useTranslation()
   useDocumentTitle(t('product.title'))
 
-  const { data: treeData } = useCategoryTree({ include_archived: false })
-  const categoryTree = treeData ?? []
+  // Katalog tekis — oddiy ro'yxat, rekursiv render kerak emas
+  const { data: categoriesData } = useAllCategories({ include_archived: false })
+  const categories = categoriesData ?? []
 
-  // View mode switcher: grid vs list (stored in localStorage)
+  // View mode switcher: grid vs list
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
     return (localStorage.getItem('products_view_mode') as 'grid' | 'list') || 'grid'
   })
@@ -88,6 +119,7 @@ export function ProductsPage() {
     setSelectedReviewsProduct(product)
     setReviewsModalOpen(true)
   }
+
   // Confirm modal state
   const [confirmConfig, setConfirmConfig] = useState<(ConfirmOptions & { isOpen: boolean }) | null>(null)
 
@@ -205,70 +237,50 @@ export function ProductsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         title={t('product.title')}
         description={t('product.subtitle')}
         actions={
-          <Button onClick={handleOpenAddModal}>
-            <Plus className="size-4" aria-hidden />
+          <Button onClick={handleOpenAddModal} className="rounded-lg font-medium text-xs">
+            <Plus className="size-3.5 mr-1" aria-hidden />
             {t('product.addProduct')}
           </Button>
         }
       />
 
       {/* Filters Toolbar */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-card/60 p-4 shadow-xs backdrop-blur-md">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              value={filters.search ?? ''}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, search: e.target.value, page: 1 }))
-              }
-              placeholder={t('common.search')}
-              className="h-10 w-full rounded-xl border border-input bg-card/60 pl-9 pr-3 text-sm text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3.5">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          {/* Qidiruv uchala tilda ishlaydi — ruscha so'rov uz interfeysda ham topadi */}
+          <SearchInput
+            value={filters.search ?? ''}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, search: e.target.value, page: 1 }))
+            }
+            placeholder={t('product.searchPlaceholder')}
+            aria-label={t('product.searchPlaceholder')}
+            wrapperClassName="flex-1"
+          />
 
-          {/* View Mode Switcher */}
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <div className="flex items-center rounded-xl border border-border/40 bg-card/40 p-1">
-              <button
-                type="button"
-                onClick={() => toggleViewMode('grid')}
-                className={`rounded-lg p-1.5 transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-brand text-brand-foreground shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title={t('product.viewGrid')}
-              >
-                <LayoutGrid className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleViewMode('list')}
-                className={`rounded-lg p-1.5 transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-brand text-brand-foreground shadow-xs'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                title={t('product.viewList')}
-              >
-                <List className="size-4" />
-              </button>
-            </div>
-          </div>
+          <Segmented<'grid' | 'list'>
+            value={viewMode}
+            onChange={toggleViewMode}
+            className="self-end sm:self-auto"
+            options={[
+              {
+                value: 'grid',
+                label: <LayoutGrid className="size-3.5" aria-hidden />,
+              },
+              { value: 'list', label: <List className="size-3.5" aria-hidden /> },
+            ]}
+          />
         </div>
 
-        {/* Filter Dropdowns & Flag Toggles Row */}
-        <div className="flex flex-wrap items-center gap-2.5 pt-1 border-t border-border/30">
+        {/* Filter Dropdowns Row */}
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
           {/* Category Select */}
-          <select
+          <NativeSelect
             value={filters.category_id ?? ''}
             onChange={(e) =>
               setFilters((prev) => ({
@@ -277,24 +289,24 @@ export function ProductsPage() {
                 page: 1,
               }))
             }
-            className="h-9 min-w-[140px] flex-1 sm:flex-initial rounded-xl border border-input bg-card/60 px-3 text-xs font-medium text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-8 w-auto min-w-[130px] text-xs"
           >
             <option value="">{t('common.all')} {t('product.category')}</option>
-            {categoryTree.map((cat) => (
+            {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
 
           {/* Stock Availability Filter */}
-          <select
+          <NativeSelect
             value={
               filters.in_stock === false
                 ? 'out_of_stock'
                 : filters.in_stock === true
-                ? 'in_stock'
-                : 'all'
+                  ? 'in_stock'
+                  : 'all'
             }
             onChange={(e) => {
               const val = e.target.value
@@ -304,15 +316,15 @@ export function ProductsPage() {
                 page: 1,
               }))
             }}
-            className="h-9 min-w-[140px] flex-1 sm:flex-initial rounded-xl border border-input bg-card/60 px-3 text-xs font-medium text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-8 w-auto min-w-[130px] text-xs"
           >
             <option value="all">{t('search.filterStockStatus')}: {t('common.all')}</option>
             <option value="in_stock">{t('dashboard.inStockProducts')}</option>
             <option value="out_of_stock">{t('dashboard.outOfStockProducts')}</option>
-          </select>
+          </NativeSelect>
 
           {/* Preset Sort Select */}
-          <select
+          <NativeSelect
             value={filters.sort ?? 'relevance'}
             onChange={(e) => {
               setFilters((prev) => ({
@@ -321,38 +333,30 @@ export function ProductsPage() {
                 page: 1,
               }))
             }}
-            className="h-9 min-w-[150px] flex-1 sm:flex-initial rounded-xl border border-input bg-card/60 px-3 text-xs font-medium text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="h-8 w-auto min-w-[130px] text-xs"
           >
             <option value="relevance">{t('product.sortRelevance')}</option>
             <option value="newest">{t('product.sortNewest')}</option>
+            <option value="name_asc">{t('product.sortByName')}</option>
             <option value="price_asc">{t('product.sortPriceAsc')}</option>
             <option value="price_desc">{t('product.sortPriceDesc')}</option>
             <option value="popular">{t('product.sortPopular')}</option>
             <option value="top_rated">{t('product.sortTopRated')}</option>
             <option value="discount">{t('product.sortDiscount')}</option>
-          </select>
+          </NativeSelect>
 
           {/* Quick Flag Toggles */}
-          <button
-            type="button"
+          <FilterChip
+            active={!!filters.is_top}
             onClick={() =>
-              setFilters((prev) => ({
-                ...prev,
-                is_top: prev.is_top ? undefined : true,
-                page: 1,
-              }))
+              setFilters((prev) => ({ ...prev, is_top: prev.is_top ? undefined : true, page: 1 }))
             }
-            className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
-              filters.is_top
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'border border-border/40 bg-card/40 text-muted-foreground hover:text-foreground'
-            }`}
           >
-            <Flame className="size-3.5" /> TOP
-          </button>
+            {t('product.isTop')}
+          </FilterChip>
 
-          <button
-            type="button"
+          <FilterChip
+            active={!!filters.is_featured}
             onClick={() =>
               setFilters((prev) => ({
                 ...prev,
@@ -360,35 +364,49 @@ export function ProductsPage() {
                 page: 1,
               }))
             }
-            className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
-              filters.is_featured
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'border border-border/40 bg-card/40 text-muted-foreground hover:text-foreground'
-            }`}
           >
-            <Sparkles className="size-3.5" /> Featured
-          </button>
+            {t('product.isFeatured')}
+          </FilterChip>
+
+          {/*
+            Katalogdagi mahsulotlarning ko'pi narxsiz kelgan (`price_on_request`)
+            — admin ularni topib narx qo'ymaguncha savat ishlamaydi.
+          */}
+          <FilterChip
+            active={!!filters.price_on_request}
+            onClick={() =>
+              setFilters((prev) => ({
+                ...prev,
+                price_on_request: prev.price_on_request ? undefined : true,
+                page: 1,
+              }))
+            }
+          >
+            {t('product.priceOnRequestShort')}
+          </FilterChip>
         </div>
       </div>
 
       {/* Bulk action toolbar */}
       {selectedIds.length > 0 && (
-        <div className="flex items-center justify-between rounded-lg border border-brand/40 bg-brand-muted p-3 text-xs text-brand">
-          <span>{selectedIds.length} {t('product.selectedCount')}</span>
+        <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 p-3 text-xs">
+          <span className="font-medium text-foreground">{selectedIds.length} {t('product.selectedCount')}</span>
           <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="secondary"
               size="sm"
+              className="rounded-lg text-xs"
               onClick={() => handleBulkArchive(true)}
             >
-              <Archive className="size-3.5 mr-1" />
+              <Archive className="size-3 mr-1" />
               {t('category.archive')} ({selectedIds.length})
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
+              className="rounded-lg text-xs"
               onClick={() => setSelectedIds([])}
             >
               {t('common.cancel')}
@@ -402,26 +420,26 @@ export function ProductsPage() {
         viewMode === 'list' ? (
           <TableSkeleton rows={5} columns={6} />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="space-y-3 rounded-lg border border-border p-4">
-                <Skeleton className="h-40 w-full rounded-md" />
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-8 w-full" />
+              <div key={i} className="space-y-3 rounded-xl border border-border p-3.5 bg-card">
+                <Skeleton className="h-36 w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4 rounded" />
+                <Skeleton className="h-3 w-1/2 rounded" />
+                <Skeleton className="h-7 w-full rounded-lg" />
               </div>
             ))}
           </div>
         )
       ) : products.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
+        <div className="rounded-xl border border-border bg-card p-10 text-center">
           <EmptyState
-            icon={<Package className="size-10 text-muted-foreground" />}
+            icon={<Package className="size-8 text-muted-foreground" />}
             title={t('empty.title')}
             description={t('empty.description')}
             action={
-              <Button onClick={handleOpenAddModal}>
-                <Plus className="size-4" aria-hidden />
+              <Button onClick={handleOpenAddModal} className="rounded-lg text-xs">
+                <Plus className="size-3.5 mr-1" aria-hidden />
                 {t('product.addProduct')}
               </Button>
             }
@@ -446,8 +464,8 @@ export function ProductsPage() {
           hasColumnsVisibilityDropdown
         />
       ) : (
-        <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="space-y-5">
+          <div className="grid gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
               <ProductCard
                 key={product.id}
@@ -464,7 +482,7 @@ export function ProductsPage() {
           </div>
 
           {meta && meta.totalPages > 1 ? (
-            <div className="flex items-center justify-center pt-4">
+            <div className="flex items-center justify-center pt-3">
               <MyPagination
                 currentPage={filters.page ?? 1}
                 totalPages={meta.totalPages}
@@ -477,7 +495,7 @@ export function ProductsPage() {
         </div>
       )}
 
-      {/* Product Edit / Add Modal */}
+      {/* Modals */}
       <ProductModal
         isOpen={modalOpen}
         onClose={() => {
@@ -487,7 +505,6 @@ export function ProductsPage() {
         product={editingProduct}
       />
 
-      {/* Stock Quantity Adjustment Modal */}
       <StockModal
         isOpen={stockModalOpen}
         onClose={() => {
@@ -497,7 +514,6 @@ export function ProductsPage() {
         product={selectedStockProduct}
       />
 
-      {/* Product Reviews & Summary Modal */}
       <ProductReviewsModal
         isOpen={reviewsModalOpen}
         onClose={() => {

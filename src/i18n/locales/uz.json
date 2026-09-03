@@ -19,13 +19,22 @@
     "actions": "Amallar",
     "none": "—",
     "optional": "ixtiyoriy",
-    "required": "majburiy"
+    "required": "majburiy",
+    "add": "Qo'shish",
+    "adminHub": "Admin boshqaruv paneli",
+    "confirm": "Tasdiqlash",
+    "copied": "Nusxalandi",
+    "view": "Ko'rish",
+    "archived": "Arxivlangan",
+    "copy": "Nusxalash",
+    "date": "Sana"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
     "products": "Mahsulotlar",
     "categories": "Kategoriyalar",
     "orders": "Buyurtmalar",
+    "payments": "To'lovlar",
     "users": "Foydalanuvchilar",
     "search": "Uzg'or Qidiruv",
     "profile": "Profil",
@@ -59,6 +68,17 @@
     "hidePassword": "Parolni yashirish",
     "welcome": "Xush kelibsiz!",
     "sessionExpired": "Sessiya tugadi. Iltimos, qaytadan kiring.",
+    "forgotPassword": "Parolni unutdingizmi?",
+    "resetPassword": "Parolni tiklash",
+    "sendOtp": "Kodni yuborish",
+    "verifyCode": "Kodni tasdiqlash",
+    "code": "6 xonali tasdiqlash kodi",
+    "codePlaceholder": "123456",
+    "newPassword": "Yangi parol",
+    "newPasswordPlaceholder": "Kamida 6 ta belgi",
+    "backToLogin": "Kirish sahifasiga qaytish",
+    "otpSent": "Tasdiqlash kodi emailingizga yuborildi",
+    "passwordResetSuccess": "Parol muvaffaqiyatli yangilandi! Yangi parol bilan kiring.",
     "errors": {
       "invalidCredentials": "Email yoki parol noto'g'ri",
       "notVerified": "Hisob tasdiqlanmagan",
@@ -69,7 +89,8 @@
       "emailRequired": "Email kiriting",
       "emailInvalid": "Email formati noto'g'ri",
       "passwordRequired": "Parol kiriting",
-      "passwordMin": "Parol kamida 6 belgidan iborat bo'lsin"
+      "passwordMin": "Parol kamida 6 belgidan iborat bo'lsin",
+      "codeRequired": "6 xonali kodni kiriting"
     }
   },
   "profile": {
@@ -146,7 +167,17 @@
     "stockHealthHint": "Mahsulotlarning ombordagi zaxira taqsimoti",
     "inStockProducts": "Yetarli zaxiradagilar",
     "lowStockProducts": "Kam zaxiradagilar (< 5 ta)",
-    "outOfStockProducts": "Tugagan mahsulotlar"
+    "outOfStockProducts": "Tugagan mahsulotlar",
+    "monthlySalesTitle": "Savdo dinamikasi (Oylik)",
+    "monthlySalesSubtitle": "Oxirgi oylardagi tushum va buyurtmalar ko'rsatkichi",
+    "revenue": "Tushum",
+    "topProductsTitle": "Eng ko'p sotilgan mahsulotlar",
+    "topProductsSubtitle": "Eng yuqori talabga ega 5 ta mahsulot",
+    "topProductsEmpty": "Hozircha ma'lumot yo'q",
+    "paidRevenue": "To'langan",
+    "deliveredCount": "Yetkazilgan",
+    "lowStock": "Kam qolgan",
+    "verifiedUsers": "Tasdiqlangan"
   },
   "search": {
     "title": "Global Qidiruv va Filtrlar",
@@ -200,6 +231,10 @@
     "finalStatus": "Bu status yakuniy, o'zgartirib bo'lmaydi",
     "statusChanged": "Status o'zgartirildi: {{status}}",
     "cancelledNote": "Buyurtma bekor qilingan",
+    "shippingAddress": "Yetkazish manzili",
+    "customerNotes": "Mijoz izohi",
+    "cancelOrder": "Buyurtmani bekor qilish",
+    "archiveOrder": "Buyurtmani arxivlash",
     "status": {
       "PENDING": "Kutilmoqda",
       "CONFIRMED": "Tasdiqlangan",
@@ -212,7 +247,9 @@
       "SHIPPED": "Jo'natilgan deb belgilash",
       "DELIVERED": "Yetkazildi",
       "CANCELLED": "Bekor qilish"
-    }
+    },
+    "orderArchived": "Buyurtma arxivlandi",
+    "callCustomer": "Qo'ng'iroq"
   },
   "user": {
     "title": "Foydalanuvchilar",
@@ -235,17 +272,52 @@
     "noMatches": "Mos foydalanuvchi topilmadi",
     "noMatchesHint": "Filtrlarni o'zgartirib yoki tozalab ko'ring.",
     "updated": "Foydalanuvchi yangilandi",
+    "roleUpdated": "Foydalanuvchi roli o'zgartirildi",
     "deletedSuccess": "Foydalanuvchi o'chirildi",
     "cannotDeleteSelf": "O'z hisobingizni o'chira olmaysiz",
-    "readOnlyHint": "Email, rol va tasdiqlash holatini API orqali o'zgartirib bo'lmaydi.",
-    "roleNotice": "Rolni o'zgartirish API'da umuman yo'q — admin faqat seed yoki baza orqali yaratiladi."
+    "readOnlyHint": "Email va tasdiqlash holatini API orqali o'zgartirib bo'lmaydi.",
+    "roleNotice": "Foydalanuvchi rolini administrator sifatida boshqarishingiz mumkin."
   },
   "payment": {
+    "title": "To'lovlar",
+    "subtitle": "Barcha to'lovlar monitoringi va hisob-kitoblar",
+    "id": "ID",
+    "order": "Buyurtma",
+    "amount": "Summa",
+    "provider": "Provayder",
+    "statusLabel": "Holat",
+    "transactionId": "Tranzaksiya ID",
+    "date": "Sana",
+    "allProviders": "Barcha provayderlar",
+    "searchPlaceholder": "ID, buyurtma yoki tranzaksiya bo'yicha qidirish...",
+    "totalCount": "Jami: {{value}}",
+    "totalPaid": "To'langan tushum",
+    "pendingPayments": "Kutilayotgan to'lovlar",
+    "failedPayments": "Bekor qilingan/Qaytarilgan",
+    "totalTransactions": "Jami operatsiyalar",
+    "copyId": "ID nusxalash",
+    "copyTransaction": "Tranzaksiya ID nusxalash",
+    "noMatches": "Mos to'lov topilmadi",
+    "noMatchesHint": "Filtrlarni o'zgartirib yoki tozalab ko'ring.",
+    "empty": "To'lovlar mavjud emas",
+    "emptyHint": "Mijozlar buyurtma to'lovlarini amalga oshirganda shu yerda ko'rinadi.",
     "status": {
       "PENDING": "Kutilmoqda",
       "SUCCESSFUL": "To'langan",
       "FAILED": "Muvaffaqiyatsiz",
       "REFUNDED": "Qaytarilgan"
+    },
+    "paymeStateLabel": "Payme holati",
+    "performedAt": "To'langan vaqt",
+    "successfulCount": "{{count}} ta muvaffaqiyatli",
+    "pendingHint": "Payme tasdiqini kutmoqda",
+    "failedHint": "Bekor qilingan yoki qaytarilgan",
+    "totalTransactionsHint": "Filtrga mos tranzaksiyalar",
+    "paymeState": {
+      "CREATED": "Yaratilgan",
+      "PERFORMED": "Bajarilgan",
+      "CANCELLED": "Bekor qilingan",
+      "CANCELLED_AFTER_PERFORM": "Qaytarilgan"
     }
   },
   "role": {
@@ -291,7 +363,13 @@
     "validation": {
       "nameRequired": "Kategoriya nomini kiriting",
       "nameExists": "Bunday nomli kategoriya allaqachon mavjud"
-    }
+    },
+    "slugPlaceholder": "masalan: elektronika",
+    "localizedHint": "Kamida bitta til to'ldirilsin. Bo'sh qolgan til o'zgarmaydi.",
+    "isFeaturedHint": "Bosh sahifada tanlangan kategoriyalar orasida chiqadi",
+    "archiveCascadeHint": "Kategoriya arxivlanadi va ichidagi {{count}} ta mahsulot ham arxivlanadi.",
+    "noMatches": "Mos kategoriya topilmadi",
+    "emptyHint": "Birinchi kategoriyani qo'shing — mahsulotlar shu kategoriyalarga biriktiriladi."
   },
   "product": {
     "title": "Mahsulotlar",
@@ -374,6 +452,28 @@
       "categoryRequired": "Kategoriyani tanlang",
       "stockInvalid": "Zaxira soni manfiy bo'lmasin",
       "discountInvalid": "Aksiya narxi asosiy narxdan kichik bo'lishi kerak"
+    },
+    "searchPlaceholder": "Nomi yoki tavsifi bo‘yicha qidirish",
+    "slugPlaceholder": "masalan: kabel-2m",
+    "localizedHint": "Kamida bitta til to'ldirilsin. Bo'sh qolgan til o'zgarmaydi.",
+    "tagsPlaceholder": "vergul bilan ajrating: yangi, aksiya",
+    "priceOnRequest": "Narx so'rov bo'yicha",
+    "priceOnRequestHint": "Narx maydonlari bloklanadi, mahsulotni buyurtma qilib bo'lmaydi.",
+    "priceOnRequestShort": "So'rov bo'yicha",
+    "attributesHint": "Har bir til alohida saqlanadi. Saqlashda eski xossalar butunlay almashtiriladi.",
+    "noAttributes": "Xossalar yo'q",
+    "attrUnit": "O'lchov",
+    "attrKeyPlaceholder": "masalan: Uzunlik",
+    "attrValuePlaceholder": "masalan: 2",
+    "attrUnitPlaceholder": "masalan: m",
+    "fiscal": {
+      "title": "Fiskalizatsiya",
+      "hint": "Soliq cheki uchun. To'ldirilmasa `.env` dagi standart qiymat ishlatiladi.",
+      "ikpuCode": "IKPU kodi",
+      "packageCode": "Qadoq kodi",
+      "vatPercent": "QQS (%)",
+      "units": "Birlik",
+      "fromEnv": "Standart (.env)"
     }
   },
   "error": {

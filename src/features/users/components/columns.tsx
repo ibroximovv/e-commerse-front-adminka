@@ -33,19 +33,19 @@ export function getUserColumns({
             <img
               src={fileUrl(record.photo)}
               alt=""
-              className="size-8 shrink-0 rounded-full object-cover"
+              className="size-8.5 shrink-0 rounded-xl object-cover border border-border/40"
             />
           ) : (
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
+            <span className="flex size-8.5 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-brand/10 text-xs font-bold text-brand">
               {initials(record.full_name, record.email)}
             </span>
           )}
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="truncate text-xs font-semibold text-foreground">
               {record.full_name || t('user.noName')}
             </p>
-            <p className="truncate text-xs text-muted-foreground">{record.email}</p>
+            <p className="truncate text-[11px] text-muted-foreground">{record.email}</p>
           </div>
         </div>
       ),
@@ -55,7 +55,7 @@ export function getUserColumns({
       dataIndex: 'phone',
       name: t('user.phone'),
       render: (val?: string) => (
-        <span className="whitespace-nowrap text-sm text-muted-foreground">
+        <span className="whitespace-nowrap text-xs text-muted-foreground">
           {val || '—'}
         </span>
       ),
@@ -83,7 +83,9 @@ export function getUserColumns({
       dataIndex: 'language',
       name: t('user.language'),
       render: (val: Language) => (
-        <span className="text-xs uppercase text-muted-foreground">{val}</span>
+        <span className="rounded-md border border-border/40 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase text-muted-foreground">
+          {val}
+        </span>
       ),
     },
     {
@@ -101,11 +103,6 @@ export function getUserColumns({
       key: 'actions',
       dataIndex: 'id',
       name: t('common.actions'),
-      /*
-       * `type: 'action'` YOZMANG — kutubxonaning `useColumns` hooki
-       * `columns.filter((c) => c.type !== 'action')` qiladi va ustun
-       * jadvaldan butunlay YO'QOLADI (amal tugmalari ko'rinmay qoladi).
-       */
       render: (_: string, record: User) => {
         const isSelf = record.id === currentUserId
 
@@ -117,8 +114,9 @@ export function getUserColumns({
               size="icon"
               onClick={() => onEdit(record)}
               title={t('common.edit')}
+              className="rounded-lg size-8"
             >
-              <Edit className="size-4" />
+              <Edit className="size-3.5" />
             </Button>
 
             <Button
@@ -128,9 +126,9 @@ export function getUserColumns({
               disabled={isSelf}
               onClick={() => onDelete(record)}
               title={isSelf ? t('user.cannotDeleteSelf') : t('common.delete')}
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="rounded-lg size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <Trash2 className="size-4" />
+              <Trash2 className="size-3.5" />
             </Button>
           </div>
         )
@@ -138,3 +136,4 @@ export function getUserColumns({
     },
   ]
 }
+

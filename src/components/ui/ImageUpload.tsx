@@ -3,7 +3,14 @@ import { Image as ImageIcon, Loader2, Plus, Trash2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
-import { fileUrl, uploadImage, UPLOAD_ACCEPT, UPLOAD_MAX_BYTES } from '@/lib/api'
+import {
+  fileUrl,
+  uploadImage,
+  uploadMultipleImages,
+  deleteUploadedFile,
+  UPLOAD_ACCEPT,
+  UPLOAD_MAX_BYTES,
+} from '@/lib/api'
 import { errorMessage } from '@/lib/utils'
 
 interface ImageUploadProps {
@@ -57,10 +64,15 @@ export function ImageUpload({
       if (multiple) {
         const remainingSlots = maxCount - imageList.length
         const filesToUpload = validFiles.slice(0, remainingSlots)
-        
-        const uploadedPaths = await Promise.all(
-          filesToUpload.map((file) => uploadImage(file)),
-        )
+
+        let uploadedPaths: string[] = []
+        if (filesToUpload.length > 1) {
+          uploadedPaths = await uploadMultipleImages(filesToUpload)
+        } else if (filesToUpload.length === 1) {
+          const singlePath = await uploadImage(filesToUpload[0])
+          uploadedPaths = [singlePath]
+        }
+
         onChange([...imageList, ...uploadedPaths])
       } else {
         const path = await uploadImage(validFiles[0])
@@ -74,7 +86,12 @@ export function ImageUpload({
     }
   }
 
-  const handleRemove = (index: number) => {
+  const handleRemove = async (index: number) => {
+    const targetPath = multiple ? imageList[index] : (typeof value === 'string' ? value : '')
+    if (targetPath) {
+      deleteUploadedFile(targetPath).catch(() => {})
+    }
+
     if (multiple) {
       const updated = imageList.filter((_, i) => i !== index)
       onChange(updated)

@@ -1,10 +1,12 @@
+import type { Localized } from '@/lib/types'
+
 export interface CategoryInput {
-  name: string
+  /** Kamida bitta til majburiy; bo'shlari to'ldirilganidan nusxalanadi. */
+  name: Localized
   slug?: string
-  description?: string
+  description?: Localized
   image?: string
   icon?: string | null
-  parent_id?: string | null
   is_featured?: boolean
   sort_order?: number
 }
@@ -19,8 +21,6 @@ export interface CategoryFilters {
   search?: string
   sortBy?: 'sort_order' | 'name' | 'created_at' | 'updated_at'
   sortOrder?: 'asc' | 'desc'
-  parent_id?: string
-  root_only?: boolean
   is_featured?: boolean
   with_product_count?: boolean
   include_archived?: boolean

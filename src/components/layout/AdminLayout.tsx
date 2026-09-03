@@ -1,7 +1,8 @@
 import { Sheet, SheetContent, SheetTitle } from 'dgz-ui/sheet'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet } from 'react-router-dom'
+import { CommandPalette } from './CommandPalette'
 import { Header } from './Header'
 import { Sidebar, SidebarBrand, SidebarNav } from './Sidebar'
 import { useProfile } from '@/features/auth/hooks'
@@ -16,6 +17,19 @@ export function AdminLayout() {
     () => localStorage.getItem(COLLAPSE_KEY) === '1',
   )
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [commandOpen, setCommandOpen] = useState(false)
+
+  // Global Ctrl+K / Cmd+K listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setCommandOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const toggleCollapse = () => {
     setCollapsed((prev) => {
@@ -26,22 +40,26 @@ export function AdminLayout() {
 
   return (
     <div className="flex min-h-dvh bg-background">
-      <Sidebar collapsed={collapsed} />
+      <Sidebar
+        collapsed={collapsed}
+        onOpenCommand={() => setCommandOpen(true)}
+      />
 
       {/* Mobil navigatsiya */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        {/*
-          `SheetContent` da fon klassi umuman yo'q (kutubxonada shunday) —
-          bermasak panel shaffof bo'lib, orqadagi kontent ko'rinib turadi.
-          Desktop sidebar bilan bir xil sirtni beramiz.
-        */}
         <SheetContent
           side="left"
           className="w-64 gap-0 border-r border-border bg-background-secondary p-0"
         >
           <SheetTitle className="sr-only">{t('nav.menu')}</SheetTitle>
           <SidebarBrand />
-          <SidebarNav onNavigate={() => setMobileOpen(false)} />
+          <SidebarNav
+            onNavigate={() => setMobileOpen(false)}
+            onOpenCommand={() => {
+              setMobileOpen(false)
+              setCommandOpen(true)
+            }}
+          />
         </SheetContent>
       </Sheet>
 
@@ -51,14 +69,22 @@ export function AdminLayout() {
           collapsed={collapsed}
           onToggleCollapse={toggleCollapse}
           onOpenMobileNav={() => setMobileOpen(true)}
+          onOpenCommand={() => setCommandOpen(true)}
         />
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-[1400px]">
+          <div className="mx-auto w-full max-w-[1440px]">
             <Outlet />
           </div>
         </main>
       </div>
+
+      {/* Universal Command Palette (⌘K) */}
+      <CommandPalette
+        isOpen={commandOpen}
+        onClose={() => setCommandOpen(false)}
+      />
     </div>
   )
 }
+

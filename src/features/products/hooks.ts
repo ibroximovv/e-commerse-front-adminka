@@ -23,6 +23,19 @@ export function useProduct(id?: string) {
   })
 }
 
+/**
+ * Tahrirlash formasi uchun uchala tildagi qiymatlar.
+ * Oddiy `useProduct` bitta til qaytaradi — u bilan saqlasak, qolgan ikki til
+ * shu tarjima bilan almashib ketadi.
+ */
+export function useProductRaw(id?: string) {
+  return useQuery({
+    queryKey: ['product', id, 'raw'],
+    queryFn: () => (id ? productsApi.byIdRaw(id) : null),
+    enabled: !!id,
+  })
+}
+
 export function useProductBySlug(slug?: string) {
   return useQuery({
     queryKey: ['product', 'slug', slug],

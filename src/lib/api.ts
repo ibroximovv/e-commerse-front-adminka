@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { tokens } from './tokens'
-import type { Envelope, Meta, Tokens } from './types'
+import type { Envelope, Language, Meta, Tokens } from './types'
 
 export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
@@ -22,14 +22,24 @@ export function setUnauthorizedHandler(handler: () => void) {
 
 // ── So'rov interceptori ──────────────────────────────────────────────────────
 
+/**
+ * `?ln` uchun joriy interfeys tili. `i18n/index.ts` uni til almashganda
+ * yangilaydi — shu tarzda `lib/` qatlami i18next'ga bog'lanmaydi.
+ *
+ * Ilgari bu qiymat `'en'` ga qotirilgan edi: o'sha paytda tarjima lug'at orqali
+ * qilinardi va tahrirlash formasiga tarjima qilingan nom tushib, saqlaganda
+ * bazadagi asl nom buzilardi. Endi tarjima BAZADAN keladi, tahrirlash formasi
+ * esa `?raw=true` bilan uchala tilni oladi — shuning uchun ro'yxatlarni
+ * foydalanuvchi tilida ko'rsatish xavfsiz.
+ */
+let apiLanguage: Language = 'uz'
+
+export function setApiLanguage(language: Language) {
+  apiLanguage = language
+}
+
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  /*
-   * `ln=en` MAJBURIY. Backend `name`, `description`, `message`, `error`,
-   * `full_name` maydonlarini tarjima qiladi va standart til `uz`. Bu parametrsiz
-   * tahrirlash formasiga tarjima qilingan qiymat tushadi va saqlaganda bazadagi
-   * asl nom buziladi. Bu — UI tilidan (i18next) mutlaqo boshqa narsa.
-   */
-  config.params = { ln: 'en', ...(config.params ?? {}) }
+  config.params = { ln: apiLanguage, ...(config.params ?? {}) }
 
   const token = tokens.access()
   if (token) config.headers.Authorization = `Bearer ${token}`
@@ -53,7 +63,7 @@ async function refreshTokens(): Promise<string> {
   const { data } = await axios.post<Envelope<Tokens>>(
     `${BASE_URL}/api/auth/refresh`,
     { refresh_token },
-    { params: { ln: 'en' } },
+    { params: { ln: apiLanguage } },
   )
 
   tokens.save(data.data.access_token, data.data.refresh_token)
@@ -116,12 +126,21 @@ export async function get<T>(url: string, params?: object): Promise<T> {
   return data.data
 }
 
+/**
+ * Tahrirlash formasi uchun: `?raw=true` bilan uchala tilni oladi
+ * (`name_uz`/`name_ru`/`name_en`). RO'YXATLARDA ishlatmang — u yerda bitta til
+ * qulayroq va faset/saralash joriy tilga tayangan.
+ */
+export async function getRaw<T>(url: string, params?: object): Promise<T> {
+  return get<T>(url, { ...params, raw: true })
+}
+
 export async function getList<T>(
   url: string,
   params?: object,
-): Promise<{ items: T[]; meta?: Meta | null }> {
+): Promise<{ items: T[]; meta?: Meta | null; language?: Language }> {
   const { data } = await api.get<Envelope<T[]>>(url, { params })
-  return { items: data.data ?? [], meta: data.meta }
+  return { items: data.data ?? [], meta: data.meta, language: data.language }
 }
 
 export async function post<T>(url: string, body?: object): Promise<T> {
@@ -168,6 +187,32 @@ export async function uploadImage(file: File): Promise<string> {
   )
 
   return data.data?.url ?? data.url ?? ''
+}
+
+/**
+ * Ko'p rasm yuklaydi (10 tagacha) va NISBIY yo'llar massivini qaytaradi.
+ */
+export async function uploadMultipleImages(files: File[]): Promise<string[]> {
+  if (files.length === 0) return []
+
+  const form = new FormData()
+  files.forEach((file) => {
+    form.append('files', file)
+  })
+
+  const { data } = await api.post<
+    Envelope<{ message: string; urls: string[] }> & { urls?: string[] }
+  >('/api/upload/multiple', form, { headers: { 'Content-Type': undefined } })
+
+  return data.data?.urls ?? data.urls ?? []
+}
+
+/**
+ * Yuklangan faylni serverdan o'chirish.
+ */
+export async function deleteUploadedFile(path: string): Promise<void> {
+  if (!path) return
+  await api.delete('/api/upload', { params: { path } })
 }
 
 // ── DataTable adapteri ───────────────────────────────────────────────────────

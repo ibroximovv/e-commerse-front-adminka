@@ -10,15 +10,28 @@ export function useCategories(filters: CategoryFilters = { include_archived: tru
   })
 }
 
-export function useCategoryTree(params?: {
+/** Selectlar uchun to'liq ro'yxat (avvalgi `useCategoryTree` o'rniga). */
+export function useAllCategories(params?: {
   with_product_count?: boolean
-  root_id?: string
   include_archived?: boolean
 }) {
   return useQuery({
-    queryKey: ['categories', 'tree', params],
-    queryFn: () => categoriesApi.tree(params),
+    queryKey: ['categories', 'all', params],
+    queryFn: () => categoriesApi.all(params),
     placeholderData: (prev) => prev,
+  })
+}
+
+/**
+ * Tahrirlash formasi uchun uchala tildagi qiymatlar.
+ * Ro'yxatdagi `Category` da faqat bitta til bor — u bilan formani to'ldirsak,
+ * saqlaganda qolgan ikki til shu tarjima bilan almashib ketardi.
+ */
+export function useCategoryRaw(id?: string) {
+  return useQuery({
+    queryKey: ['category', id, 'raw'],
+    queryFn: () => (id ? categoriesApi.byIdRaw(id) : null),
+    enabled: !!id,
   })
 }
 
@@ -26,6 +39,7 @@ export function useCategoryMutations() {
   const qc = useQueryClient()
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ['categories'] })
+    void qc.invalidateQueries({ queryKey: ['category'] })
     void qc.invalidateQueries({ queryKey: ['products'] })
   }
 

@@ -2,7 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from 'dgz-ui/button'
 import { Form } from 'dgz-ui/form'
 import { MyInput } from 'dgz-ui-shared/components/form'
-import { KeyRound, Loader2 } from 'lucide-react'
+import { KeyRound, Loader2, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
@@ -15,8 +16,11 @@ export function ChangePasswordCard() {
   const { t } = useTranslation()
   const changePassword = useChangePassword()
 
-  /* Backend: new_password >= 6 (ChangePasswordDto). Tasdiqlash maydoni faqat
-     frontendda — backend uni bilmaydi. */
+  const [showOld, setShowOld] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  /* Backend: new_password >= 6 (ChangePasswordDto). */
   const schema = z
     .object({
       old_password: z.string().min(1, t('profile.validation.oldRequired')),
@@ -32,7 +36,6 @@ export function ChangePasswordCard() {
       message: t('profile.validation.sameAsOld'),
     })
 
-  // `My*` komponentlari `useFormContext()` ga tayanadi — `Form` bilan o'raladi.
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { old_password: '', new_password: '', confirm_password: '' },
@@ -61,46 +64,92 @@ export function ChangePasswordCard() {
     >
       <Form {...form}>
         <form noValidate onSubmit={onSubmit} className="space-y-4">
-          <MyInput
-            control={control}
-            name="old_password"
-            type="password"
-            autoComplete="current-password"
-            label={t('profile.oldPassword')}
-            required
-          />
-
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="relative">
             <MyInput
               control={control}
-              name="new_password"
-              type="password"
-              autoComplete="new-password"
-              label={t('profile.newPassword')}
+              name="old_password"
+              type={showOld ? 'text' : 'password'}
+              autoComplete="current-password"
+              label={t('profile.oldPassword')}
               required
             />
-            <MyInput
-              control={control}
-              name="confirm_password"
-              type="password"
-              autoComplete="new-password"
-              label={t('profile.confirmPassword')}
-              required
-            />
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowOld(!showOld)}
+              className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showOld ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
           </div>
 
-          <Button type="submit" disabled={changePassword.isPending}>
-            {changePassword.isPending ? (
-              <>
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-                {t('common.saving')}
-              </>
-            ) : (
-              t('profile.changePassword')
-            )}
-          </Button>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="relative">
+              <MyInput
+                control={control}
+                name="new_password"
+                type={showNew ? 'text' : 'password'}
+                autoComplete="new-password"
+                label={t('profile.newPassword')}
+                required
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowNew(!showNew)}
+                className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showNew ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+
+            <div className="relative">
+              <MyInput
+                control={control}
+                name="confirm_password"
+                type={showConfirm ? 'text' : 'password'}
+                autoComplete="new-password"
+                label={t('profile.confirmPassword')}
+                required
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground pt-1">
+            <ShieldCheck className="size-3.5 text-emerald-500" />
+            <span>Parol kamida 6 ta belgidan iborat bo'lishi va avvalgi paroldan farq qilishi lozim.</span>
+          </div>
+
+          <div className="pt-2">
+            <Button
+              type="submit"
+              className="rounded-xl font-medium"
+              disabled={changePassword.isPending}
+            >
+              {changePassword.isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  {t('common.saving')}
+                </>
+              ) : (
+                <>
+                  <Lock className="size-4 mr-1.5" />
+                  {t('profile.changePassword')}
+                </>
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
     </SectionCard>
   )
 }
+

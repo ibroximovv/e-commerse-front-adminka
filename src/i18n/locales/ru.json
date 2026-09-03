@@ -19,13 +19,22 @@
     "actions": "Действия",
     "none": "—",
     "optional": "необязательно",
-    "required": "обязательно"
+    "required": "обязательно",
+    "add": "Добавить",
+    "adminHub": "Панель администратора",
+    "confirm": "Подтвердить",
+    "copied": "Скопировано",
+    "view": "Просмотр",
+    "archived": "В архиве",
+    "copy": "Копировать",
+    "date": "Дата"
   },
   "nav": {
     "dashboard": "Панель управления",
     "products": "Товары",
     "categories": "Категории",
     "orders": "Заказы",
+    "payments": "Платежи",
     "users": "Пользователи",
     "search": "Глобальный поиск",
     "profile": "Профиль",
@@ -59,6 +68,17 @@
     "hidePassword": "Скрыть пароль",
     "welcome": "Добро пожаловать!",
     "sessionExpired": "Сессия истекла. Пожалуйста, войдите снова.",
+    "forgotPassword": "Забыли пароль?",
+    "resetPassword": "Сброс пароля",
+    "sendOtp": "Отправить код",
+    "verifyCode": "Подтвердить код",
+    "code": "6-значный код подтверждения",
+    "codePlaceholder": "123456",
+    "newPassword": "Новый пароль",
+    "newPasswordPlaceholder": "Не менее 6 символов",
+    "backToLogin": "Вернуться ко входу",
+    "otpSent": "Код подтверждения отправлен на вашу почту",
+    "passwordResetSuccess": "Пароль успешно обновлен! Войдите с новым паролем.",
     "errors": {
       "invalidCredentials": "Неверный email или пароль",
       "notVerified": "Аккаунт не подтверждён",
@@ -69,7 +89,8 @@
       "emailRequired": "Введите email",
       "emailInvalid": "Неверный формат email",
       "passwordRequired": "Введите пароль",
-      "passwordMin": "Пароль должен быть не короче 6 символов"
+      "passwordMin": "Пароль должен быть не короче 6 символов",
+      "codeRequired": "Введите 6-значный код"
     }
   },
   "profile": {
@@ -146,7 +167,17 @@
     "stockHealthHint": "Распределение остатков товаров на складе",
     "inStockProducts": "В достаточном количестве",
     "lowStockProducts": "Мало на складе (< 5 шт)",
-    "outOfStockProducts": "Закончились"
+    "outOfStockProducts": "Закончились",
+    "monthlySalesTitle": "Динамика продаж (По месяцам)",
+    "monthlySalesSubtitle": "Выручка и количество заказов за последние месяцы",
+    "revenue": "Выручка",
+    "topProductsTitle": "Самые продаваемые товары",
+    "topProductsSubtitle": "5 самых востребованных товаров",
+    "topProductsEmpty": "Пока нет данных",
+    "paidRevenue": "Оплачено",
+    "deliveredCount": "Доставлено",
+    "lowStock": "Заканчивается",
+    "verifiedUsers": "Подтвержденных"
   },
   "search": {
     "title": "Глобальный поиск и фильтры",
@@ -200,6 +231,10 @@
     "finalStatus": "Это конечный статус, изменить нельзя",
     "statusChanged": "Статус изменён: {{status}}",
     "cancelledNote": "Заказ отменён",
+    "shippingAddress": "Адрес доставки",
+    "customerNotes": "Примечание клиента",
+    "cancelOrder": "Отменить заказ",
+    "archiveOrder": "Архивировать заказ",
     "status": {
       "PENDING": "В ожидании",
       "CONFIRMED": "Подтверждён",
@@ -212,7 +247,9 @@
       "SHIPPED": "Отметить отправленным",
       "DELIVERED": "Доставлен",
       "CANCELLED": "Отменить"
-    }
+    },
+    "orderArchived": "Заказ архивирован",
+    "callCustomer": "Позвонить"
   },
   "user": {
     "title": "Пользователи",
@@ -235,17 +272,52 @@
     "noMatches": "Пользователи не найдены",
     "noMatchesHint": "Измените или сбросьте фильтры.",
     "updated": "Пользователь обновлён",
+    "roleUpdated": "Роль пользователя обновлена",
     "deletedSuccess": "Пользователь удалён",
     "cannotDeleteSelf": "Нельзя удалить собственную учётную запись",
-    "readOnlyHint": "Email, роль и статус подтверждения нельзя изменить через API.",
-    "roleNotice": "Смена роли в API отсутствует — админ создаётся только через seed или базу."
+    "readOnlyHint": "Email и статус подтверждения нельзя изменить через API.",
+    "roleNotice": "Вы можете управлять ролью пользователя в качестве администратора."
   },
   "payment": {
+    "title": "Платежи",
+    "subtitle": "Мониторинг всех платежей и расчеты",
+    "id": "ID",
+    "order": "Заказ",
+    "amount": "Сумма",
+    "provider": "Провайдер",
+    "statusLabel": "Статус",
+    "transactionId": "ID транзакции",
+    "date": "Дата",
+    "allProviders": "Все провайдеры",
+    "searchPlaceholder": "Поиск по ID, заказу или транзакции...",
+    "totalCount": "Всего: {{value}}",
+    "totalPaid": "Оплаченная выручка",
+    "pendingPayments": "Ожидающие платежи",
+    "failedPayments": "Отмененные/Возвращенные",
+    "totalTransactions": "Всего операций",
+    "copyId": "Копировать ID",
+    "copyTransaction": "Копировать транзакцию",
+    "noMatches": "Платежи не найдены",
+    "noMatchesHint": "Попробуйте изменить или сбросить фильтры.",
+    "empty": "Платежей нет",
+    "emptyHint": "Когда клиенты будут оплачивать заказы, они появятся здесь.",
     "status": {
       "PENDING": "В ожидании",
       "SUCCESSFUL": "Оплачен",
       "FAILED": "Неуспешно",
       "REFUNDED": "Возвращён"
+    },
+    "paymeStateLabel": "Статус Payme",
+    "performedAt": "Время оплаты",
+    "successfulCount": "успешных: {{count}}",
+    "pendingHint": "Ожидает подтверждения Payme",
+    "failedHint": "Отменённые или возвращённые",
+    "totalTransactionsHint": "Транзакции по текущему фильтру",
+    "paymeState": {
+      "CREATED": "Создана",
+      "PERFORMED": "Проведена",
+      "CANCELLED": "Отменена",
+      "CANCELLED_AFTER_PERFORM": "Возврат"
     }
   },
   "role": {
@@ -291,7 +363,13 @@
     "validation": {
       "nameRequired": "Введите название категории",
       "nameExists": "Категория с таким названием уже существует"
-    }
+    },
+    "slugPlaceholder": "например: elektronika",
+    "localizedHint": "Заполните хотя бы один язык. Пустой язык остаётся без изменений.",
+    "isFeaturedHint": "Показывать среди избранных категорий на главной",
+    "archiveCascadeHint": "Категория будет архивирована вместе с {{count}} товарами внутри неё.",
+    "noMatches": "Категории не найдены",
+    "emptyHint": "Добавьте первую категорию — товары привязываются к категориям."
   },
   "product": {
     "title": "Товары",
@@ -374,6 +452,28 @@
       "categoryRequired": "Выберите категорию",
       "stockInvalid": "Количество не должно быть отрицательным",
       "discountInvalid": "Акционная цена должна быть меньше базовой"
+    },
+    "searchPlaceholder": "Поиск по названию или описанию",
+    "slugPlaceholder": "например: kabel-2m",
+    "localizedHint": "Заполните хотя бы один язык. Пустой язык остаётся без изменений.",
+    "tagsPlaceholder": "через запятую: новинка, акция",
+    "priceOnRequest": "Цена по запросу",
+    "priceOnRequestHint": "Поля цены блокируются, товар нельзя заказать.",
+    "priceOnRequestShort": "По запросу",
+    "attributesHint": "Каждый язык хранится отдельно. При сохранении старые характеристики полностью заменяются.",
+    "noAttributes": "Характеристик нет",
+    "attrUnit": "Единица",
+    "attrKeyPlaceholder": "например: Длина",
+    "attrValuePlaceholder": "например: 2",
+    "attrUnitPlaceholder": "например: м",
+    "fiscal": {
+      "title": "Фискализация",
+      "hint": "Для налогового чека. Если не заполнено, берётся значение из `.env`.",
+      "ikpuCode": "Код ИКПУ",
+      "packageCode": "Код упаковки",
+      "vatPercent": "НДС (%)",
+      "units": "Единица измерения",
+      "fromEnv": "По умолчанию (.env)"
     }
   },
   "error": {
