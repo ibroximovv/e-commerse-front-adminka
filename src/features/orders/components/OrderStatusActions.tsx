@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import { useOrderMutations } from '../hooks'
 import { ConfirmModal, type ConfirmOptions } from '@/components/ui/ConfirmModal'
 import type { Order, OrderStatus } from '@/lib/types'
-import { ORDER_STATUS_FLOW } from '@/lib/types'
+import { ORDER_STATUS_FLOW, ORDER_STATUS_WARNINGS } from '@/lib/types'
 import { errorMessage } from '@/lib/utils'
 
 const STATUS_ICONS: Record<OrderStatus, LucideIcon> = {
@@ -73,10 +73,12 @@ export function OrderStatusActions({
                 : 'rounded-xl'
             }
             onClick={() => {
-              if (destructive || status === 'DELIVERED') {
+              const warning = ORDER_STATUS_WARNINGS[status]
+
+              if (warning) {
                 openConfirm({
                   title: t('order.changeStatus'),
-                  description: `${t(`order.action.${status}`)}: ${t('order.changeStatusHint')}`,
+                  description: `${t(`order.action.${status}`)}: ${t(warning)}`,
                   confirmText: t(`order.action.${status}`),
                   iconType: destructive ? 'warning' : 'info',
                   variant: destructive ? 'danger' : 'warning',

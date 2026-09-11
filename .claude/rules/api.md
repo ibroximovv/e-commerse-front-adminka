@@ -1,6 +1,7 @@
 # API qoidalari
 
-Manba: `../e-commerse/docs/admin-frontend.md`. Bu fayl — amaliy qisqartma.
+Manba: `../e-commerse-back/docs/frontend-admin.md`. Bu fayl — amaliy qisqartma.
+(Eski `admin-frontend.md` **eskirgan**, undan foydalanmang.)
 
 ## Base
 
@@ -115,28 +116,56 @@ throw new Error(Array.isArray(raw) ? raw.join(', ') : raw);
 
 **Products** `/api/products` — GET 🔓 (sahifalash + `meta`), GET `/:id` 🔓, POST 👑, PATCH `/:id` 👑, DELETE `/:id` 👑
 
-Query: `page`, `limit`, `search`, `category_id`, `min_price`, `max_price`, `sortBy` (`name|price|stock|created_at`), `sortOrder` (`asc|desc`), `all`, `price_on_request`.
+Query: `page`, `limit`, `search`, `category_id`, `min_price`, `max_price`, `sortBy` (`name|price|stock|created_at`), `sortOrder` (`asc|desc`), `include_archived`, `price_on_request`.
 
 - `search` uchala tilda ham qidiradi — interfeys tiliga qarab natija yo'qolmaydi.
 - `include_descendants` **olib tashlangan** (kategoriyalar endi tekis).
+- `sku` yozishda **trim + UPPERCASE** qilinadi, unikalligi registrga bog'liq emas — takrorlansa `409`.
 
-> ⚠️ **`all=false` yubormang** — backend bug'i tufayli `true` kabi ishlaydi va arxivlanganlarni ham qaytaradi. Arxivlanganlar kerak bo'lmasa parametrni **umuman qo'shmang**. Adminkada odatda `all=true` kerak.
+> ⚠️ Arxivlanganlarni ko'rish uchun **`include_archived=true`** (faqat ADMIN tokeni bilan ishlaydi). Eski `all` parametri `deprecated` — ishlatmang, kerak bo'lmasa parametrni **umuman qo'shmang**.
 
 Body: `{ name: {uz,ru,en}, description?, price: number, stock?, images?, category_id, tags?, attributes?, price_on_request?, ikpu_code?, package_code?, vat_percent?, units? }`. PATCH da hammasi ixtiyoriy + `is_archived?`.
 
 - `price` — `Float`. `Number` yuboring, string emas (`"999.99"` validatsiyadan o'tmaydi).
 - `price_on_request: true` bo'lsa narx maydonlari bloklanadi va mahsulotni buyurtma qilib bo'lmaydi.
 - `attributes` — `[{ key: {uz,ru,en}, value: {…}, unit?: {…} }]`. **PATCH da massiv to'liq almashtiriladi**, shuning uchun tahrirlashda hamma qatorni qayta yuboring. O'lchov birligini `key` ichiga yozmang (`"Uzunlik (m)"` ❌) — `unit` alohida. Sonli qiymat uchala tilda bir xil bo'lsin, aks holda faset ikkiga bo'linadi.
-- Fiskalizatsiya: `vat_percent` faqat `0` yoki `12`; yuborilmasa `.env` dagi standart ishlatiladi.
+- Fiskalizatsiya — pastdagi alohida bo'limga qarang. Mahsulotdagi to'rt maydon faqat **qoplash** uchun.
 
 Faset atributlari `key` (filtrlash uchun barqaror kalit) va `label` (ko'rsatish uchun tarjima) ga bo'lingan. **Filtrga `key` yuboring, ekranga `label` chizing** — aralashtirsangiz til almashganda tanlangan filtr yo'qoladi.
 
-**Categories** `/api/categories` — GET 🔓 (`?all=true` arxivlanganlar bilan), GET `/all` 🔓 (menyu va select uchun, sahifalashsiz), GET `/:id` 🔓, POST/PATCH/DELETE 👑. Sahifalash yo'q.
+**Categories** `/api/categories` — GET 🔓 (`?include_archived=true` arxivlanganlar bilan), GET `/all` 🔓 (menyu va select uchun, sahifalashsiz), GET `/:id` 🔓, POST/PATCH/DELETE 👑. Sahifalash yo'q.
 
 Katalog **tekis**: `parent_id`, `children`, `breadcrumbs`, `GET /tree`, `GET /:id/breadcrumbs`, `?root_only`, `?parent_id` — hammasi olib tashlangan.
 
 - Kategoriya arxivlansa **ichidagi mahsulotlar ham arxivlanadi** — tasdiqlash dialogida shuni aytib qo'ying.
 - Mahsuloti bor kategoriyani o'chirib bo'lmaydi (400).
+
+Body: `{ name: {uz,ru,en}, description?, slug?, image?, icon?, is_featured?, sort_order?, ikpu_code?, package_code?, vat_percent?, units? }`.
+
+### Fiskalizatsiya (IKPU) — to'lov shunga bog'liq
+
+`ikpu_code`, `package_code`, `vat_percent` **to'ldirilmasa Payme to'lovni boshlatmaydi**
+(`-31008`). `.env` dagi eski `PAYME_DEFAULT_*` zaxirasi **butunlay olib tashlangan** —
+kod topilmasa standart qiymat yo'q, to'lov shunchaki to'xtaydi.
+
+| Daraja | Maqsad |
+|---|---|
+| `Category` | **asosiy joy** — 8 ta kategoriyani to'ldirsangiz butun katalog qamraladi |
+| `Product` | faqat **istisno** — kategoriyanikini qoplaydi (bitta kategoriyada IKPU si boshqacha tovar bo'lsa) |
+
+Yechim tartibi: `Product` → `Category` → xato.
+
+- `vat_percent` faqat `0` yoki `12`. **`0` — haqiqiy qiymat** ("QQS to'lovchisi emasman"),
+  "bo'sh" emas: backend `??` bilan yechadi. Formada checkbox emas, **select** ishlating:
+  "belgilanmagan" / "0%" / "12%".
+- `package_code` hujjatda ixtiyoriy ko'rinadi, **amalda majburiy** — bo'lmasa OFD chekni rad etadi.
+- `units` ixtiyoriy (dona = `241092`), lekin **`0` yubormang** — bunday kod yo'q.
+- Bo'sh maydon `null` bo'lib ketadi: mahsulotda bu "kategoriyanikini ishlat" degani.
+
+Front tomonda: `lib/fiscal.ts` (`fiscalToForm` / `fiscalFromForm` / `hasFiscalData`) va
+umumiy `components/ui/FiscalSection` — kategoriya formasida ochiq, mahsulotda yig'ilgan
+va kategoriyaning qiymati placeholder sifatida. Kodi yo'q kategoriya ro'yxatda
+**qizil belgilanadi**.
 
 **Users** `/api/users` — GET `/profile` 🔑, PATCH `/profile` 🔑, GET 👑 (`?page=1&limit=10&role=USER&search=...`), GET `/stats` 👑, GET `/:id` 👑, PATCH `/:id` 👑, PATCH `/:id/role` 👑 (`{ role: 'ADMIN' | 'USER' }`), DELETE `/:id` 👑
 
@@ -146,6 +175,14 @@ Tahrirlanadigan maydonlar: `full_name`, `phone`, `photo`, `language`. Admin tomo
 
 Model: `user`, `items.product`, `payment`, `shipping_address`, `customer_phone`, `customer_name`, `notes`, `payment_method`, `is_archived`.
 
+> ⚠️ **`CONFIRMED` ni qo'lda qo'ymang.** Uni Payme `PerformTransaction` yuborganda backend
+> o'zi qo'yadi — qo'lda tasdiqlash to'lanmagan buyurtmani to'langan ko'rsatadi. Adminkada
+> bu o'tish ogohlantirish dialogi orqali o'tadi (`ORDER_STATUS_WARNINGS`), faqat naqd
+> to'lov uchun qoldirilgan.
+>
+> Bekor qilish **zaxirani qaytaradi** va `sales_count` ni kamaytiradi. `DELIVERED`
+> buyurtmani Payme orqali bekor qilib bo'lmaydi (`-31007`) — belgilashdan oldin ogohlantiring.
+
 **Payments** `/api/payments` — GET `/admin/all` 👑 (`?page=1&limit=10&status=...&provider=...&search=...`), GET `/status/:order_id` 🔑. Statuslar: `PENDING`, `SUCCESSFUL`, `FAILED`, `REFUNDED`.
 
 Payme maydonlari: `payme_transaction_id` (avvalgi `transaction_id`), `payme_state`, `payme_create_time` / `payme_perform_time` / `payme_cancel_time` (**millisekundlik timestamp**, ISO satr emas), `payme_reason`.
@@ -154,7 +191,12 @@ Payme maydonlari: `payme_transaction_id` (avvalgi `transaction_id`), `payme_stat
 
 > `status` yolg'iz yetarli emas: bekor qilingan to'lov ham, qaytarilgan pul ham `FAILED` bo'lib keladi — farqi faqat `payme_state` da. Shuning uchun ro'yxatda ikkalasi ham ko'rsatiladi (`PaymeStateBadge`).
 
-> Adminkada to'lov tugmasi **qo'ymang**. Eski `POST /api/payments` o'chirilgan; o'rniga `POST /api/payments/checkout` → `checkout_url`, u faqat mijozning o'z buyurtmasi uchun ishlaydi. Monitoring sahifasi `/payments` orqali kuzatiladi.
+> Adminkada to'lov tugmasi **qo'ymang**. Eski `POST /api/payments` o'chirilgan; o'rniga `GET /api/payments/checkout/:order_id` → `checkout_url`, u faqat mijozning o'z buyurtmasi uchun ishlaydi. Monitoring sahifasi `/payments` orqali kuzatiladi.
+
+> `Payment` — bitta buyurtmaga **bitta** yozuv (eng so'nggi urinishning nusxasi), admin
+> ro'yxati shundan o'qiydi. Haqiqiy manba `PaymeTransaction`: Payme har urinish uchun
+> yangi tranzaksiya ochadi, ya'ni bitta qatorning ortida 3 ta urinish turgan bo'lishi
+> mumkin. Sverka uchun alohida endpoint hozircha yo'q.
 
 **Upload** — `POST /api/upload` 🔑 (`file`), `POST /api/upload/multiple` 🔑 (`files` - 10 tagacha), `DELETE /api/upload?path=...` 🔑.
 

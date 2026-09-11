@@ -3,7 +3,7 @@ import { Button } from 'dgz-ui/button'
 import { Form } from 'dgz-ui/form'
 import { MyInput } from 'dgz-ui-shared/components/form'
 import { MyModal } from 'dgz-ui-shared/components/modal'
-import { Loader2, Receipt, X } from 'lucide-react'
+import { AlertTriangle, Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useController, useForm, useWatch, type Control } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -13,9 +13,11 @@ import { useProductMutations, useProductRaw } from '../hooks'
 import type { ProductAttributeInput, ProductInput } from '../types'
 import { AttributesEditor } from './AttributesEditor'
 import { Field, NativeSelect, controlClass } from '@/components/ui/Field'
+import { FiscalSection } from '@/components/ui/FiscalSection'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { LocalizedField } from '@/components/ui/LocalizedField'
 import { useAllCategories } from '@/features/categories/hooks'
+import { EMPTY_FISCAL_FORM, fiscalFromForm, fiscalToForm, hasFiscalData } from '@/lib/fiscal'
 import { cleanLocalized, fromRaw, hasAnyLocale } from '@/lib/localized'
 import type { Localized, Product } from '@/lib/types'
 import { cn, errorMessage, formatPrice } from '@/lib/utils'
@@ -42,11 +44,11 @@ const schema = z.object({
   images: z.array(z.string()),
   tags: z.array(z.string()),
   attributes: z.array(z.object({ key: localized, value: localized, unit: localized })),
-  /* Fiskalizatsiya — satr sifatida saqlanadi, yuborishdan oldin songa aylanadi */
-  ikpu_code: z.string().optional(),
-  package_code: z.string().optional(),
-  vat_percent: z.string().optional(),
-  units: z.string().optional(),
+  /* Fiskal QOPLASH — satr sifatida saqlanadi, yuborishdan oldin songa aylanadi */
+  ikpu_code: z.string(),
+  package_code: z.string(),
+  vat_percent: z.string(),
+  units: z.string(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -67,10 +69,7 @@ const EMPTY: FormValues = {
   images: [],
   tags: [],
   attributes: [],
-  ikpu_code: '',
-  package_code: '',
-  vat_percent: '',
-  units: '',
+  ...EMPTY_FISCAL_FORM,
 }
 
 interface ProductModalProps {
@@ -107,9 +106,13 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
   } = form
 
   const imagesValue = useWatch({ control, name: 'images' })
+  const categoryId = useWatch({ control, name: 'category_id' })
   const priceValue = useWatch({ control, name: 'price' })
   const discountPriceValue = useWatch({ control, name: 'discount_price' })
   const priceOnRequest = useWatch({ control, name: 'price_on_request' })
+
+  /* Fiskal kodlar shu kategoriyadan meros bo'ladi — placeholder va ogohlantirish uchun */
+  const selectedCategory = categoryOptions.find((cat) => cat.id === categoryId) ?? null
 
   const priceNum = Number(priceValue) || 0
   const discountNum = Number(discountPriceValue) || 0
@@ -148,10 +151,7 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
         value: fromRaw(attr, 'value'),
         unit: fromRaw(attr, 'unit'),
       })),
-      ikpu_code: raw.ikpu_code ?? '',
-      package_code: raw.package_code ?? '',
-      vat_percent: raw.vat_percent == null ? '' : String(raw.vat_percent),
-      units: raw.units == null ? '' : String(raw.units),
+      ...fiscalToForm(raw),
     })
   }, [isOpen, product, raw, reset, categories])
 
@@ -185,7 +185,9 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
     const payload: ProductInput = {
       name,
       slug: values.slug?.trim() || undefined,
-      sku: values.sku?.trim() || null,
+      // Backend SKU ni trim + UPPERCASE qiladi — bir xil ko'rinsin, aks holda
+      // "qb-60" yozib saqlagan odam ro'yxatda "QB-60" ni ko'rib chalkashadi
+      sku: values.sku?.trim().toUpperCase() || null,
       brand: values.brand?.trim() || null,
       tags: values.tags,
       description: cleanLocalized(values.description as Localized),
@@ -199,10 +201,8 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
       images: values.images ?? [],
       // PATCH da atributlar TO'LIQ almashtiriladi — massivni butunlay yuboramiz
       attributes,
-      ikpu_code: values.ikpu_code?.trim() || null,
-      package_code: values.package_code?.trim() || null,
-      vat_percent: values.vat_percent ? Number(values.vat_percent) : null,
-      units: values.units?.trim() ? Number(values.units) : null,
+      // Bo'sh qolgan maydon `null` bo'ladi: backend kategoriyanikini oladi
+      ...fiscalFromForm(values),
     }
 
     const onError = (err: unknown) => toast.error(errorMessage(err, t('error.generic')))
@@ -270,6 +270,7 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
                   {categoryOptions.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
+                      {hasFiscalData(cat) ? '' : ` — ${t('fiscal.noCodesShort')}`}
                     </option>
                   ))}
                 </NativeSelect>
@@ -299,6 +300,17 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
                 placeholder="1WZB-250"
               />
             </div>
+
+            {/*
+              Kategoriyada fiskal kod bo'lmasa bu mahsulotni TO'LAB BO'LMAYDI
+              (`-31008`) — muammoni saqlashdan oldin ko'rsatamiz.
+            */}
+            {selectedCategory && !hasFiscalData(selectedCategory) ? (
+              <p className="flex items-start gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-[11px] text-destructive">
+                <AlertTriangle className="mt-px size-3.5 shrink-0" aria-hidden />
+                {t('fiscal.categoryMissingWarning', { name: selectedCategory.name })}
+              </p>
+            ) : null}
 
             <LocalizedField
               control={control}
@@ -420,54 +432,17 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
 
             <AttributesEditor control={control} name="attributes" />
 
-            {/* ── Fiskalizatsiya ───────────────────────────────────── */}
-            <section className="space-y-3 rounded-xl border border-border p-4">
-              <div className="flex items-start gap-2">
-                <Receipt className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-                <div>
-                  <h3 className="text-xs font-medium text-foreground">
-                    {t('product.fiscal.title')}
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    {t('product.fiscal.hint')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <MyInput
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  control={control as any}
-                  name="ikpu_code"
-                  label={t('product.fiscal.ikpuCode')}
-                  placeholder="08471001001000000"
-                />
-
-                <MyInput
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  control={control as any}
-                  name="package_code"
-                  label={t('product.fiscal.packageCode')}
-                  placeholder="1501886"
-                />
-
-                <Field label={t('product.fiscal.vatPercent')}>
-                  <NativeSelect {...register('vat_percent')}>
-                    <option value="">{t('product.fiscal.fromEnv')}</option>
-                    <option value="0">0%</option>
-                    <option value="12">12%</option>
-                  </NativeSelect>
-                </Field>
-
-                <MyInput
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  control={control as any}
-                  name="units"
-                  label={t('product.fiscal.units')}
-                  placeholder="241092"
-                />
-              </div>
-            </section>
+            {/*
+              Fiskal kodlar KATEGORIYADA to'ldiriladi — bu yer faqat istisno
+              uchun (bitta kategoriya ichida IKPU si boshqacha tovar bo'lsa).
+              Shuning uchun yig'ilgan holda va kategoriyaniki placeholder'da.
+            */}
+            <FiscalSection
+              collapsible
+              fallback={selectedCategory}
+              title={t('fiscal.overrideTitle')}
+              description={t('fiscal.overrideHint')}
+            />
 
             <div className="flex items-center justify-end gap-2 border-t border-border pt-4">
               <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>

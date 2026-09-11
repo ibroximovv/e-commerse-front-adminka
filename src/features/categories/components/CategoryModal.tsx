@@ -12,8 +12,10 @@ import { z } from 'zod'
 import { useCategoryMutations, useCategoryRaw } from '../hooks'
 import type { CategoryInput } from '../types'
 import { Field } from '@/components/ui/Field'
+import { FiscalSection } from '@/components/ui/FiscalSection'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { LocalizedField } from '@/components/ui/LocalizedField'
+import { EMPTY_FISCAL_FORM, fiscalFromForm, fiscalToForm } from '@/lib/fiscal'
 import { cleanLocalized, fromRaw, hasAnyLocale } from '@/lib/localized'
 import type { Category, Localized } from '@/lib/types'
 import { errorMessage } from '@/lib/utils'
@@ -32,6 +34,11 @@ const schema = z.object({
   is_featured: z.boolean().optional(),
   description: localized,
   image: z.string().optional(),
+  /* Fiskalizatsiya — formada satr, yuborishdan oldin songa aylanadi */
+  ikpu_code: z.string(),
+  package_code: z.string(),
+  vat_percent: z.string(),
+  units: z.string(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -44,6 +51,7 @@ const EMPTY: FormValues = {
   is_featured: false,
   description: {},
   image: '',
+  ...EMPTY_FISCAL_FORM,
 }
 
 interface CategoryModalProps {
@@ -93,6 +101,7 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
       is_featured: raw.is_featured ?? false,
       description: fromRaw(raw, 'description'),
       image: raw.image ?? '',
+      ...fiscalToForm(raw),
     })
   }, [isOpen, category, raw, reset])
 
@@ -108,6 +117,7 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
       is_featured: !!values.is_featured,
       description: cleanLocalized(values.description as Localized),
       image: values.image || undefined,
+      ...fiscalFromForm(values),
     }
 
     const onError = (err: unknown) => toast.error(errorMessage(err, t('error.generic')))
@@ -211,6 +221,15 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
                 </span>
               </span>
             </label>
+
+            {/*
+              Fiskal kodlarning ASOSIY joyi shu yer: bitta kategoriyani
+              to'ldirsangiz ichidagi hamma mahsulot qamraladi.
+            */}
+            <FiscalSection
+              title={t('fiscal.title')}
+              description={t('fiscal.categoryHint')}
+            />
 
             <Field label={t('category.image')}>
               <ImageUpload

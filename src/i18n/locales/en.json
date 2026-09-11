@@ -168,6 +168,7 @@
     "inStockProducts": "In Stock",
     "lowStockProducts": "Low Stock (< 5 pcs)",
     "outOfStockProducts": "Out of Stock",
+    "priceOnRequestProducts": "Price on request",
     "monthlySalesTitle": "Sales Dynamics (Monthly)",
     "monthlySalesSubtitle": "Revenue and order volume over recent months",
     "revenue": "Revenue",
@@ -227,7 +228,7 @@
     "noMatches": "No matching orders",
     "noMatchesHint": "Try changing or resetting the filters.",
     "changeStatus": "Change status",
-    "changeStatusHint": "Only the next step is allowed — it cannot be undone",
+    "changeStatusHint": "Move the status step by step. On payment, Payme sets Confirmed itself.",
     "finalStatus": "This is a final status and cannot be changed",
     "statusChanged": "Status changed to {{status}}",
     "cancelledNote": "This order was cancelled",
@@ -249,7 +250,12 @@
       "CANCELLED": "Cancel order"
     },
     "orderArchived": "Order archived",
-    "callCustomer": "Call"
+    "callCustomer": "Call",
+    "warning": {
+      "manualConfirm": "Payme normally sets Confirmed once the payment goes through. Confirm manually only for cash payments — otherwise an unpaid order will look paid.",
+      "delivered": "A delivered order cannot be cancelled through Payme — refunds become impossible.",
+      "cancelled": "Stock is returned and sales stats go down. A cancelled order cannot be restored."
+    }
   },
   "user": {
     "title": "Users",
@@ -332,14 +338,10 @@
     "name": "Category name",
     "namePlaceholder": "E.g. Electronics",
     "slug": "Slug (URL)",
-    "parentCategory": "Parent category",
-    "noParent": "No parent (Root)",
     "icon": "Icon",
     "sortOrder": "Sort order",
     "isFeatured": "Featured category (Homepage)",
     "featured": "Featured",
-    "treeView": "Tree view",
-    "listView": "List view",
     "productCount": "Product count",
     "description": "Description",
     "descriptionPlaceholder": "Short category description...",
@@ -465,16 +467,25 @@
     "attrUnit": "Unit",
     "attrKeyPlaceholder": "e.g. Length",
     "attrValuePlaceholder": "e.g. 2",
-    "attrUnitPlaceholder": "e.g. m",
-    "fiscal": {
-      "title": "Fiscalization",
-      "hint": "Used on the tax receipt. Left empty, the `.env` default applies.",
-      "ikpuCode": "IKPU code",
-      "packageCode": "Package code",
-      "vatPercent": "VAT (%)",
-      "units": "Units",
-      "fromEnv": "Default (.env)"
-    }
+    "attrUnitPlaceholder": "e.g. m"
+  },
+  "fiscal": {
+    "title": "Fiscalization",
+    "categoryHint": "Required for the Payme receipt. These codes apply to every product in the category.",
+    "overrideTitle": "Override fiscal code (optional)",
+    "overrideHint": "Leave empty to inherit from the category. Fill in only for a product with a different IKPU.",
+    "ikpuCode": "IKPU code",
+    "packageCode": "Package code",
+    "vatPercent": "VAT (%)",
+    "units": "Unit code",
+    "unitsHint": "Piece = 241092. Leave empty if unknown.",
+    "notSet": "Not set",
+    "fromCategoryValue": "From category: {{value}}%",
+    "ready": "Filled in",
+    "missing": "No code",
+    "noCodesShort": "no fiscal code",
+    "incompleteWarning": "Until the IKPU code, package code and VAT are filled in, products in this category cannot be paid for.",
+    "categoryMissingWarning": "Category \"{{name}}\" has no fiscal code — this product cannot be paid for. Fill in the category or override the code here."
   },
   "error": {
     "title": "Something went wrong",

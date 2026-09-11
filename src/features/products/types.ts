@@ -1,4 +1,4 @@
-import type { Localized, ProductSortPreset, StockStatus } from '@/lib/types'
+import type { FiscalFields, Localized, ProductSortPreset, StockStatus } from '@/lib/types'
 
 /** Yozishda atributning har bir maydoni ko'p tilli. */
 export interface ProductAttributeInput {
@@ -7,7 +7,11 @@ export interface ProductAttributeInput {
   unit?: Localized
 }
 
-export interface ProductInput {
+/**
+ * Fiskal maydonlar bu yerda faqat QOPLASH uchun: bo'sh bo'lsa backend
+ * kategoriyanikini oladi. `.env` dagi eski zaxira olib tashlangan.
+ */
+export interface ProductInput extends FiscalFields {
   /** Kamida bitta til majburiy; bo'shlari to'ldirilganidan nusxalanadi. */
   name: Localized
   slug?: string
@@ -26,11 +30,6 @@ export interface ProductInput {
   attributes?: ProductAttributeInput[]
   is_top?: boolean
   is_featured?: boolean
-  /* Fiskalizatsiya — bo'sh qolsa backend `.env` dagi zaxira qiymatni oladi. */
-  ikpu_code?: string | null
-  package_code?: string | null
-  vat_percent?: number | null
-  units?: number | null
 }
 
 export interface ProductUpdateInput extends Partial<ProductInput> {

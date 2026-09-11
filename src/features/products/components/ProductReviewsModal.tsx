@@ -3,8 +3,7 @@ import { MyModal } from 'dgz-ui-shared/components/modal'
 import { CheckCircle2, Star, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
-import { useProductReviews, useReviewSummary } from '../hooks'
-import { productsApi } from '../api'
+import { useProductReviews, useReviewMutations, useReviewSummary } from '../hooks'
 import type { Product } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -22,8 +21,9 @@ export function ProductReviewsModal({
   const { t } = useTranslation()
   const productId = product?.id
 
-  const { data: reviewsData, refetch: refetchReviews } = useProductReviews(productId)
-  const { data: summaryData, refetch: refetchSummary } = useReviewSummary(productId)
+  const { data: reviewsData } = useProductReviews(productId)
+  const { data: summaryData } = useReviewSummary(productId)
+  const { remove } = useReviewMutations(productId)
 
   if (!product) return null
 
@@ -32,10 +32,8 @@ export function ProductReviewsModal({
 
   const handleDeleteReview = async (reviewId: string) => {
     try {
-      await productsApi.deleteReview(reviewId)
+      await remove.mutateAsync(reviewId)
       toast.success(t('product.reviewDeleted'))
-      void refetchReviews()
-      void refetchSummary()
     } catch {
       toast.error(t('error.generic'))
     }

@@ -1,33 +1,31 @@
 import { useTranslation } from 'react-i18next'
+import type { DashboardStats } from '@/lib/types'
 
 export function StockHealthCard({
   products,
-  stockHealth,
 }: {
-  products?: {
-    total_active: number
-    archived: number
-    out_of_stock: number
-    low_stock: number
-  }
-  stockHealth?: {
-    inStock: number
-    lowStock: number
-    outOfStock: number
-  }
+  products?: DashboardStats['products']
 }) {
   const { t } = useTranslation()
 
-  const lowStock = products?.low_stock ?? stockHealth?.lowStock ?? 0
-  const outOfStock = products?.out_of_stock ?? stockHealth?.outOfStock ?? 0
-  const totalActive = products?.total_active ?? ((stockHealth?.inStock ?? 0) + lowStock + outOfStock)
-  const inStock = Math.max(0, totalActive - lowStock - outOfStock)
+  const lowStock = products?.low_stock ?? 0
+  const outOfStock = products?.out_of_stock ?? 0
+  /*
+   * Narxi kelishiladigan tovarlar ataylab `stock: 0` bilan turadi va backend
+   * ularni `out_of_stock` ga QO'SHMAYDI. Bu yerda ham alohida ajratamiz —
+   * aks holda ular "zaxirada bor" bo'lib sanalib, ko'rsatkich yolg'on chiqadi.
+   */
+  const onRequest = products?.price_on_request ?? 0
+  const totalActive = products?.total_active ?? 0
+  const inStock = Math.max(0, totalActive - lowStock - outOfStock - onRequest)
 
-  const total = inStock + lowStock + outOfStock
+  const total = inStock + lowStock + outOfStock + onRequest
 
-  const inStockPercent = total > 0 ? Math.round((inStock / total) * 100) : 0
-  const lowStockPercent = total > 0 ? Math.round((lowStock / total) * 100) : 0
-  const outOfStockPercent = total > 0 ? Math.round((outOfStock / total) * 100) : 0
+  const percent = (value: number) => (total > 0 ? Math.round((value / total) * 100) : 0)
+  const inStockPercent = percent(inStock)
+  const lowStockPercent = percent(lowStock)
+  const outOfStockPercent = percent(outOfStock)
+  const onRequestPercent = percent(onRequest)
 
   return (
     <div className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-4 sm:p-5">
@@ -60,10 +58,16 @@ export function StockHealthCard({
             style={{ width: `${outOfStockPercent}%` }}
           />
         )}
+        {onRequestPercent > 0 && (
+          <div
+            className="h-full bg-muted-foreground/40 transition-all duration-300"
+            style={{ width: `${onRequestPercent}%` }}
+          />
+        )}
       </div>
 
       {/* Stock Legend Capsules */}
-      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+      <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4">
         <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
           <div className="font-semibold text-foreground">{inStock}</div>
           <div className="text-[11px] text-muted-foreground truncate">{t('dashboard.inStockProducts')}</div>
@@ -77,6 +81,13 @@ export function StockHealthCard({
         <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
           <div className="font-semibold text-foreground">{outOfStock}</div>
           <div className="text-[11px] text-muted-foreground truncate">{t('dashboard.outOfStockProducts')}</div>
+        </div>
+
+        <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
+          <div className="font-semibold text-foreground">{onRequest}</div>
+          <div className="text-[11px] text-muted-foreground truncate">
+            {t('dashboard.priceOnRequestProducts')}
+          </div>
         </div>
       </div>
     </div>

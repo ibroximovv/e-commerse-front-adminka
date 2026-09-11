@@ -1,6 +1,11 @@
-import type { Localized } from '@/lib/types'
+import type { FiscalFields, Localized } from '@/lib/types'
 
-export interface CategoryInput {
+/**
+ * Fiskal maydonlar (`ikpu_code`, `package_code`, `vat_percent`, `units`)
+ * ASOSAN shu yerda to'ldiriladi — mahsulotdagisi faqat istisno uchun.
+ * Bo'sh qolsa bu kategoriyadagi mahsulotlarni to'lab bo'lmaydi (`-31008`).
+ */
+export interface CategoryInput extends FiscalFields {
   /** Kamida bitta til majburiy; bo'shlari to'ldirilganidan nusxalanadi. */
   name: Localized
   slug?: string

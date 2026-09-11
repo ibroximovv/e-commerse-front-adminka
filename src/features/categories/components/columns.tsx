@@ -3,6 +3,7 @@ import { Button } from 'dgz-ui/button'
 import type { ColumnType } from 'dgz-ui-shared/types'
 import { Archive, ArchiveRestore, Edit, Folder, Trash2 } from 'lucide-react'
 import { fileUrl } from '@/lib/api'
+import { hasFiscalData } from '@/lib/fiscal'
 import type { Category } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -79,6 +80,25 @@ export function getCategoryColumns({
       render: (val: number | undefined) => (
         <span className="text-xs font-mono text-muted-foreground">{val ?? 0}</span>
       ),
+    },
+    {
+      /*
+       * Fiskal kod bo'lmasa bu kategoriyadagi mahsulotlarni TO'LAB BO'LMAYDI
+       * (Payme `-31008`). Rang yolg'iz signal bo'lmasligi uchun matn ham bor.
+       */
+      key: 'fiscal',
+      dataIndex: 'ikpu_code',
+      name: t('fiscal.title'),
+      render: (_: unknown, record: Category) =>
+        hasFiscalData(record) ? (
+          <Badge type="status" variant="green" rounded="full">
+            {t('fiscal.ready')}
+          </Badge>
+        ) : (
+          <Badge type="status" variant="red" rounded="full">
+            {t('fiscal.missing')}
+          </Badge>
+        ),
     },
     {
       key: 'status',

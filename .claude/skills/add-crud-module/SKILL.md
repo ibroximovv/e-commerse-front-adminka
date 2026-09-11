@@ -9,7 +9,7 @@ Bu skill `src/features/<modul>/` ostida to'liq modul yaratadi. Avval [`.claude/r
 
 ## 0. Oldindan tekshiring
 
-1. `../e-commerse/docs/admin-frontend.md` dan modulning endpointlarini toping.
+1. `../e-commerse-back/docs/frontend-admin.md` dan modulning endpointlarini toping.
 2. `../e-commerse/src/api/<modul>/dto/*.dto.ts` dan validatsiya qoidalarini o'qing — forma sxemasi shunga mos bo'lishi kerak.
 3. Modulda **sahifalash bormi?** Hozircha faqat `GET /api/products` da `meta` qaytadi. Qolganlarida yo'q — bu 3-qadamni o'zgartiradi.
 4. `src/lib/types.ts` da domen tipi bormi? Bo'lsa qayta yozmang.

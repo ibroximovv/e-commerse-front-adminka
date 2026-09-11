@@ -27,8 +27,6 @@ export const categoriesApi = {
   /** Tahrirlash formasi uchun: `name_uz`/`name_ru`/`name_en` bilan. */
   byIdRaw: (id: string) => getRaw<CategoryRaw>(`/api/categories/${id}`),
 
-  bySlug: (slug: string) => get<Category>(`/api/categories/slug/${slug}`),
-
   create: (body: CategoryInput) => post<Category>('/api/categories', body),
 
   update: (id: string, body: CategoryUpdateInput) =>

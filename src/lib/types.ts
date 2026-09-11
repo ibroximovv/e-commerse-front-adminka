@@ -1,6 +1,6 @@
 /**
  * Backend domen tiplari.
- * Manba: ../e-commerse/docs/admin-frontend.md §6 va prisma/schema.prisma.
+ * Manba: ../e-commerse-back/docs/frontend-admin.md §13 va prisma/schema.prisma.
  *
  * Maydon nomlari backenddagidek snake_case qoladi — konvertatsiya qilinmaydi.
  */
@@ -44,10 +44,32 @@ export interface User {
 }
 
 /**
+ * Fiskalizatsiya maydonlari — Payme chekini soliq organiga uzatish uchun.
+ *
+ * ASOSIY joyi — `Category`: 8 ta kategoriyani to'ldirsangiz butun katalog
+ * qamraladi. `Product` dagi o'sha maydonlar faqat ISTISNO uchun (bitta
+ * kategoriya ichida IKPU si boshqacha tovar bo'lsa), ular kategoriyanikini
+ * qoplaydi. Yechim tartibi: `Product` → `Category` → xato.
+ *
+ * `.env` dagi eski `PAYME_DEFAULT_*` zaxirasi BUTUNLAY olib tashlangan —
+ * kod topilmasa to'lov `-31008` bilan to'xtaydi, standart qiymat yo'q.
+ */
+export interface FiscalFields {
+  /** MXIK / IKPU — soliq tovar klassifikatori (17 xonali). Majburiy. */
+  ikpu_code?: string | null
+  /** Qadoqlash kodi. Hujjatda ixtiyoriy ko'rinadi, amalda MAJBURIY. */
+  package_code?: string | null
+  /** QQS foizi: faqat `0` yoki `12`. `0` — haqiqiy qiymat, "bo'sh" emas. */
+  vat_percent?: number | null
+  /** O'lchov birligi kodi (dona = 241092). Ixtiyoriy; `0` yubormang. */
+  units?: number | null
+}
+
+/**
  * Katalog TEKIS — ichki kategoriya yo'q. `parent_id`, `children`, `/tree` va
  * `breadcrumbs` backenddan olib tashlangan, ularni qaytarib qo'shmang.
  */
-export interface Category {
+export interface Category extends FiscalFields {
   id: string
   name: string
   slug: string
@@ -107,7 +129,7 @@ export type ProductSortPreset =
   | 'name_asc'
   | 'name_desc'
 
-export interface Product {
+export interface Product extends FiscalFields {
   id: string
   name: string
   slug: string
@@ -138,11 +160,6 @@ export interface Product {
   category?: Category
   created_at: string
   updated_at: string
-  /* Fiskalizatsiya — Payme chekini soliq organiga uzatish uchun. */
-  ikpu_code?: string | null
-  package_code?: string | null
-  vat_percent?: number | null
-  units?: number | null
 }
 
 /** `GET /api/products/:id?raw=true` — tahrirlash formasi uchun uchala til. */
@@ -222,14 +239,6 @@ export interface Payment {
   updated_at?: string
 }
 
-/** `POST /api/payments/checkout` javobi (adminka ishlatmaydi, mijoz oqimi). */
-export interface PaymentCheckout {
-  order_id: string
-  provider: string
-  amount: number
-  checkout_url: string
-}
-
 export interface OrderItem {
   id: string
   product_id: string
@@ -270,8 +279,8 @@ export interface AuthResponse {
 export interface UserStats {
   total_users: number
   verified_users: number
-  admin_count?: number
-  user_count?: number
+  admins_count?: number
+  regular_users?: number
 }
 
 export interface DashboardMonthlySales {
@@ -296,8 +305,10 @@ export interface DashboardStats {
   products: {
     total_active: number
     archived: number
+    /** Narxi kelishiladiganlar bu yerga SANALMAYDI — ular ataylab `stock: 0`. */
     out_of_stock: number
     low_stock: number
+    price_on_request: number
   }
   users: {
     total_users: number
@@ -306,16 +317,6 @@ export interface DashboardStats {
   monthly_sales: DashboardMonthlySales[]
   recent_orders: Order[]
   top_products: Product[]
-}
-
-export interface SystemHealth {
-  status: string
-  uptime?: number
-  timestamp?: string
-  database?: {
-    status: string
-    latency?: number
-  }
 }
 
 /** Sahifalash ma'lumoti va fasetlar. */
@@ -345,13 +346,32 @@ export interface Envelope<T> {
   language?: Language
 }
 
-/** Buyurtma statusining ruxsat etilgan ketma-ketligi. */
+/**
+ * Buyurtma statusining ruxsat etilgan ketma-ketligi.
+ *
+ * `CONFIRMED` ni Payme `PerformTransaction` yuborganda BACKEND o'zi qo'yadi.
+ * Qo'lda qo'yish to'lanmagan buyurtmani to'langan ko'rsatadi — shuning uchun
+ * `PENDING → CONFIRMED` o'tishi ogohlantirish dialogi orqali o'tadi
+ * (`ORDER_STATUS_WARNINGS`), faqat naqd to'lov uchun qoldirilgan.
+ */
 export const ORDER_STATUS_FLOW: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
   CONFIRMED: ['SHIPPED', 'CANCELLED'],
   SHIPPED: ['DELIVERED', 'CANCELLED'],
   DELIVERED: [],
   CANCELLED: [],
+}
+
+/**
+ * Tasdiqlash dialogi majburiy bo'lgan o'tishlar va sababining locale kaliti.
+ *
+ * `DELIVERED` — yetkazilgan buyurtmani Payme orqali bekor qilib bo'lmaydi
+ * (`-31007`), ya'ni qaytarish yo'li yopiladi.
+ */
+export const ORDER_STATUS_WARNINGS: Partial<Record<OrderStatus, string>> = {
+  CONFIRMED: 'order.warning.manualConfirm',
+  DELIVERED: 'order.warning.delivered',
+  CANCELLED: 'order.warning.cancelled',
 }
 
 export const ORDER_STATUSES: OrderStatus[] = [

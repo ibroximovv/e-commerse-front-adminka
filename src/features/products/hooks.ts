@@ -36,14 +36,6 @@ export function useProductRaw(id?: string) {
   })
 }
 
-export function useProductBySlug(slug?: string) {
-  return useQuery({
-    queryKey: ['product', 'slug', slug],
-    queryFn: () => (slug ? productsApi.bySlug(slug) : null),
-    enabled: !!slug,
-  })
-}
-
 export function useProductReviews(
   productId?: string,
   params?: { page?: number; limit?: number; rating?: number; verified_only?: boolean; sort?: string },
@@ -61,6 +53,26 @@ export function useReviewSummary(productId?: string) {
     queryFn: () => (productId ? productsApi.getReviewSummary(productId) : null),
     enabled: !!productId,
   })
+}
+
+/**
+ * Sharh moderatsiyasi — adminka faqat o'chira oladi (yozish mijoz oqimi,
+ * tahrirlash endpointi yo'q). O'chirilgach mahsulot reytingi qayta hisoblanadi,
+ * shuning uchun mahsulot keshi ham yangilanadi.
+ */
+export function useReviewMutations(productId?: string) {
+  const qc = useQueryClient()
+
+  return {
+    remove: useMutation({
+      mutationFn: (id: string) => productsApi.deleteReview(id),
+      onSuccess: () => {
+        void qc.invalidateQueries({ queryKey: ['reviews', productId] })
+        void qc.invalidateQueries({ queryKey: ['review-summary', productId] })
+        void qc.invalidateQueries({ queryKey: ['products'] })
+      },
+    }),
+  }
 }
 
 export function useProductMutations() {

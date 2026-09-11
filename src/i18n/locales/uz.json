@@ -168,6 +168,7 @@
     "inStockProducts": "Yetarli zaxiradagilar",
     "lowStockProducts": "Kam zaxiradagilar (< 5 ta)",
     "outOfStockProducts": "Tugagan mahsulotlar",
+    "priceOnRequestProducts": "Narxi kelishiladigan",
     "monthlySalesTitle": "Savdo dinamikasi (Oylik)",
     "monthlySalesSubtitle": "Oxirgi oylardagi tushum va buyurtmalar ko'rsatkichi",
     "revenue": "Tushum",
@@ -227,7 +228,7 @@
     "noMatches": "Mos buyurtma topilmadi",
     "noMatchesHint": "Filtrlarni o'zgartirib yoki tozalab ko'ring.",
     "changeStatus": "Statusni o'zgartirish",
-    "changeStatusHint": "Faqat keyingi bosqichga o'tish mumkin — ortga qaytarib bo'lmaydi",
+    "changeStatusHint": "Statusni bosqichma-bosqich o'zgartiring. To'lov o'tganda \"Tasdiqlangan\" ni Payme o'zi qo'yadi.",
     "finalStatus": "Bu status yakuniy, o'zgartirib bo'lmaydi",
     "statusChanged": "Status o'zgartirildi: {{status}}",
     "cancelledNote": "Buyurtma bekor qilingan",
@@ -249,7 +250,12 @@
       "CANCELLED": "Bekor qilish"
     },
     "orderArchived": "Buyurtma arxivlandi",
-    "callCustomer": "Qo'ng'iroq"
+    "callCustomer": "Qo'ng'iroq",
+    "warning": {
+      "manualConfirm": "Tasdiqlangan statusni odatda Payme to'lov o'tganda o'zi qo'yadi. Qo'lda tasdiqlash faqat naqd to'lov uchun — aks holda to'lanmagan buyurtma to'langan ko'rinadi.",
+      "delivered": "Yetkazilgan buyurtmani Payme orqali bekor qilib bo'lmaydi — pulni qaytarish yo'li yopiladi.",
+      "cancelled": "Zaxira qaytariladi va sotuv statistikasi kamayadi. Bekor qilingan buyurtmani ortga qaytarib bo'lmaydi."
+    }
   },
   "user": {
     "title": "Foydalanuvchilar",
@@ -332,14 +338,10 @@
     "name": "Kategoriya nomi",
     "namePlaceholder": "Masalan: Elektronika",
     "slug": "Slug (URL kaliti)",
-    "parentCategory": "Ota kategoriya",
-    "noParent": "Ota kategoriya yo'q (ildiz)",
     "icon": "Ikonka",
     "sortOrder": "Tartib raqami",
     "isFeatured": "Mashhur kategoriya (Bosh sahifa)",
     "featured": "Mashhur",
-    "treeView": "Daraxt ko'rinishi",
-    "listView": "Ro'yxat ko'rinishi",
     "productCount": "Mahsulotlar soni",
     "description": "Tavsif",
     "descriptionPlaceholder": "Kategoriya haqida qisqacha...",
@@ -465,16 +467,25 @@
     "attrUnit": "O'lchov",
     "attrKeyPlaceholder": "masalan: Uzunlik",
     "attrValuePlaceholder": "masalan: 2",
-    "attrUnitPlaceholder": "masalan: m",
-    "fiscal": {
-      "title": "Fiskalizatsiya",
-      "hint": "Soliq cheki uchun. To'ldirilmasa `.env` dagi standart qiymat ishlatiladi.",
-      "ikpuCode": "IKPU kodi",
-      "packageCode": "Qadoq kodi",
-      "vatPercent": "QQS (%)",
-      "units": "Birlik",
-      "fromEnv": "Standart (.env)"
-    }
+    "attrUnitPlaceholder": "masalan: m"
+  },
+  "fiscal": {
+    "title": "Fiskalizatsiya",
+    "categoryHint": "Payme cheki uchun majburiy. Shu yerdagi kodlar kategoriyadagi barcha mahsulotlarga qo'llanadi.",
+    "overrideTitle": "Fiskal kodni qoplash (ixtiyoriy)",
+    "overrideHint": "Bo'sh qoldiring — kategoriyanikini oladi. Faqat IKPU si boshqacha tovar uchun to'ldiring.",
+    "ikpuCode": "IKPU kodi",
+    "packageCode": "Qadoq kodi",
+    "vatPercent": "QQS (%)",
+    "units": "O'lchov birligi kodi",
+    "unitsHint": "Dona = 241092. Bilmasangiz bo'sh qoldiring.",
+    "notSet": "Belgilanmagan",
+    "fromCategoryValue": "Kategoriyadan: {{value}}%",
+    "ready": "To'ldirilgan",
+    "missing": "Kod yo'q",
+    "noCodesShort": "fiskal kodsiz",
+    "incompleteWarning": "IKPU kodi, qadoq kodi va QQS to'ldirilmaguncha bu kategoriyadagi mahsulotlarni to'lab bo'lmaydi.",
+    "categoryMissingWarning": "\"{{name}}\" kategoriyasida fiskal kod yo'q — bu mahsulotni to'lab bo'lmaydi. Kategoriyani to'ldiring yoki kodni shu yerda qoplang."
   },
   "error": {
     "title": "Xatolik yuz berdi",
