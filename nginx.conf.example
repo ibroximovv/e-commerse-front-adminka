@@ -1,0 +1,92 @@
+# ==============================================================================
+# Nginx - adminka (statik SPA) uchun alohida sub-domen
+# Serverdagi joylashuvi: /etc/nginx/sites-available/admin.ocomarket.uz.conf
+#
+#   sudo ln -s /etc/nginx/sites-available/admin.ocomarket.uz.conf /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#   sudo certbot --nginx -d admin.ocomarket.uz
+#
+# certbot 443/SSL blokini va 80 -> 443 yo'naltirishni shu faylga o'zi qo'shadi.
+#
+# Bu yerda proxy YO'Q: adminka - statik fayllar to'plami. API so'rovlari
+# brauzerdan to'g'ridan-to'g'ri api.ocomarket.uz ga ketadi (build paytidagi
+# VITE_API_URL). Shuning uchun bu domenga /api/ bloki kerak emas.
+# ==============================================================================
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name admin.ocomarket.uz;
+
+    # Repo /var/www/e-commerse-front-adminka ga klon qilingan, nginx esa uning
+    # `dist/` ini to'g'ridan-to'g'ri beradi - har deployda nusxa ko'chirish shart emas.
+    # DIQQAT: `dist` ga emas, `dist/` ning ICHIGA (index.html shu yerda) ishora qiladi.
+    root /var/www/e-commerse-front-adminka/dist;
+    index index.html;
+
+    access_log /var/log/nginx/admin.ocomarket.uz.access.log;
+    error_log  /var/log/nginx/admin.ocomarket.uz.error.log;
+
+    # Let's Encrypt tekshiruvi. `^~` prefiksi bu blok boshqalaridan ustun
+    # turishini kafolatlaydi - aks holda so'rov SPA fallback'iga tushib,
+    # certbot token o'rniga index.html ni o'qiydi va yiqiladi.
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/html;
+        default_type "text/plain";
+    }
+
+    # ── Xavfsizlik sarlavhalari ───────────────────────────────────────────────
+    #
+    # DIQQAT: nginx'da `add_header` MEROS BO'LMAYDI - agar ichki `location`
+    # blokida o'z `add_header` i bo'lsa, yuqoridagilari butunlay tushib qoladi.
+    # Shuning uchun pastdagi bloklarda ular qayta yozilgan. Bittasini
+    # o'zgartirsangiz, hammasini o'zgartiring.
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    # Adminka qidiruvga tushmasin
+    add_header X-Robots-Tag "noindex, nofollow" always;
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_types text/plain text/css application/javascript application/json
+               image/svg+xml font/woff font/woff2;
+
+    # ── Hash'langan assetlar ──────────────────────────────────────────────────
+    # Vite fayl nomiga hash qo'shadi (index-CybIb3Xm.js), ya'ni kontent
+    # o'zgarsa nom ham o'zgaradi - bir yillik kesh xavfsiz.
+    #
+    # `expires` ishlatilmaydi: u ham o'z `Cache-Control` ini qo'shadi va javobda
+    # sarlavha IKKI marta chiqadi. Hammasini bitta qatorda beramiz.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+
+        access_log off;
+        try_files $uri =404;
+    }
+
+    # ── index.html ────────────────────────────────────────────────────────────
+    # Keshlanmasligi SHART: u yangi hash'li asset nomlarini ko'rsatadi.
+    # Keshlansa foydalanuvchi deploydan keyin ham eski versiyani ochib turadi
+    # va yo'q bo'lgan asset'larga 404 oladi (ekran oq qoladi).
+    location = /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+    }
+
+    # ── SPA fallback ──────────────────────────────────────────────────────────
+    # React Router marshrutlari (/products, /orders/:id ...) serverda fayl
+    # sifatida mavjud emas. Bu qator bo'lmasa sahifani yangilaganda 404 chiqadi.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

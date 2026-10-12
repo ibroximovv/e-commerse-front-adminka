@@ -55,6 +55,17 @@ Adminka `http://localhost:5173` da ochiladi. Backend'da `app.enableCors()` yoqil
 
 ---
 
+## Serverga joylashtirish
+
+Adminka — statik SPA, `admin.ocomarket.uz` da. To'liq tartib (nginx, certbot, yangilash):
+[`docs/deploy.md`](docs/deploy.md). Nginx namunasi: [`nginx.conf.example`](nginx.conf.example).
+
+> ⚠️ Build qilishdan oldin `.env.production` da `VITE_API_URL=https://api.ocomarket.uz`
+> bo'lsin. Vite env ni build paytida singdiradi — `localhost:3000` bilan yig'ilgan
+> `dist/` serverda ishlamaydi va uni keyin tuzatib bo'lmaydi.
+
+---
+
 ## Papka tuzilishi
 
 ```
@@ -93,9 +104,10 @@ features/<modul>/
 
 Batafsil qoidalar — [`.claude/rules/`](.claude/rules/) va [`AGENTS.md`](AGENTS.md) da. Eng kritiklari:
 
-1. **Har bir API so'roviga `ln=en` qo'shiladi.** Backend `name`/`description` maydonlarini tarjima qiladi; `ln` yubormasangiz tahrirlash formasiga tarjima qilingan matn tushadi va saqlaganda bazadagi asl nom buziladi. Bu `lib/api.ts` interceptorida markazlashgan — qo'lda `axios` ishlatmang.
-2. **UI tili ≠ API tili.** Interfeys uz/ru/en bo'la oladi, lekin API so'rovlari **doim** `ln=en` bilan ketadi.
-3. **`all=false` yubormang** (mahsulotlarda) — backend bug'i tufayli `true` kabi ishlaydi. Kerak bo'lmasa parametrni umuman qo'shmang.
+1. **Har bir API so'roviga `ln` qo'shiladi** va u interfeys tiliga ergashadi. Bu `lib/api.ts` interceptorida markazlashgan — qo'lda `axios` ishlatmang, aks holda na `ln`, na token, na refresh bo'ladi.
+2. **Tahrirlash formasi `?raw=true` bilan yuklanadi.** Oddiy so'rov bitta tilni qaytaradi; u bilan saqlasangiz qolgan ikki til shu tarjima bilan almashib ketadi. `getRaw` / `useProductRaw` / `useCategoryRaw` ishlating.
+3. **Arxivlanganlar uchun `include_archived=true`** (eski `all` parametri deprecated). Kerak bo'lmasa parametrni umuman qo'shmang.
+4. **Fiskal kodlar (IKPU) kategoriyada to'ldiriladi**, mahsulotdagisi faqat qoplash uchun. To'ldirilmasa Payme to'lovni boshlatmaydi (`-31008`).
 4. **`DELETE` — haqiqiy o'chirish.** Odatiy holatda `PATCH { is_archived: true }` ishlating.
 5. **Access token 15 daqiqa.** Avtomatik refresh `lib/api.ts` da.
 6. **Jadval ustuniga `type: 'action'` bermang** — kutubxona bunday ustunni jimgina olib tashlaydi va amal tugmalari yo'qoladi.
