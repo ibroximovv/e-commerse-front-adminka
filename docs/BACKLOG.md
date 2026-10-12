@@ -165,6 +165,20 @@ Backendda statistika endpointi yo'q — hammasi frontendda hisoblanadi.
   - `uz.json`, `ru.json`, `en.json` to'liq sinxronlashtirildi
   - `npm run build` muvaffaqiyatli yakunlandi
 
+## Bosqich 12 — Telefon orqali kirish va so'mdagi narxlar (`../e-commerse-back/docs/front-changes-phone-auth.md`)
+
+- [x] Login: **telefon + parol** (`LoginPage`, `authApi.login`); xato turi status kodidan (401/429/403) — backend matnlari tarjima qilinadi
+- [x] "Parolni unutdingizmi" / OTP oqimi olib tashlandi (`forgot-password`, `reset-password` — 404)
+- [x] `User` tipidan `email`, `is_verified` olib tashlandi; `phone` E.164, `full_name` majburiy
+- [x] `lib/phone.ts` — `normalizePhone` / `formatPhone` / `phoneMatches` (raqamlar bo'yicha qidiruv)
+- [x] Foydalanuvchilar: email ustuni va "tasdiqlangan" filtri/badge o'rniga telefon; qidiruv — ism yoki telefon
+- [x] Foydalanuvchi modali va profil: telefon validatsiyasi + login ma'lumoti o'zgarishi haqida ogohlantirish
+- [x] `verified_users` statistikasi olib tashlandi (dashboard, users sahifasi)
+- [x] Buyurtmalar, global qidiruv, command palette: email → telefon
+- [x] Parolni almashtirish: yangi parol ≥ 8
+- [x] Narxlar butun so'mda: `formatPrice` → `1 250 000 so'm`, mahsulot formasida `step="1"` + `int()` validatsiya
+- [x] `npm run build`
+
 ---
 
 ## Backendda yo'q — frontend qoplaydi

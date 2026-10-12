@@ -12,7 +12,6 @@ import {
   SlidersHorizontal,
   ExternalLink,
   Phone,
-  Mail,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +25,8 @@ import { useOrders } from '@/features/orders/hooks'
 import { useProducts } from '@/features/products/hooks'
 import { useUsers } from '@/features/users/hooks'
 import { fileUrl } from '@/lib/api'
-import { formatPrice, shortId } from '@/lib/utils'
+import { formatPhone, phoneMatches } from '@/lib/phone'
+import { formatPrice, initials, shortId } from '@/lib/utils'
 
 type SearchEntityType = 'all' | 'products' | 'categories' | 'orders' | 'users'
 
@@ -123,8 +123,7 @@ export function GlobalSearchPage() {
       const idMatch = o.id.toLowerCase().includes(q)
       const userMatch =
         o.user?.full_name?.toLowerCase().includes(q) ||
-        o.user?.email?.toLowerCase().includes(q) ||
-        o.user?.phone?.toLowerCase().includes(q)
+        phoneMatches(o.user?.phone, q)
       const itemMatch = o.items.some((i) =>
         i.product?.name?.toLowerCase().includes(q),
       )
@@ -139,8 +138,7 @@ export function GlobalSearchPage() {
       if (!q) return true
       return (
         u.full_name?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q) ||
-        u.phone?.toLowerCase().includes(q)
+        phoneMatches(u.phone, q)
       )
     })
   }, [users, query])
@@ -508,7 +506,7 @@ export function GlobalSearchPage() {
                           <OrderStatusBadge status={order.status} />
                         </div>
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          {order.user?.full_name || order.user?.email || 'Guest'} ·{' '}
+                          {order.user?.full_name || formatPhone(order.user?.phone) || t('common.none')} ·{' '}
                           {order.items.length} {t('order.itemsShort')}
                         </p>
                       </div>
@@ -549,11 +547,11 @@ export function GlobalSearchPage() {
                         {user.photo ? (
                           <img
                             src={fileUrl(user.photo)}
-                            alt={user.full_name || user.email}
+                            alt={user.full_name}
                             className="size-full object-cover"
                           />
                         ) : (
-                          (user.full_name || user.email)[0].toUpperCase()
+                          initials(user.full_name)
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -564,14 +562,10 @@ export function GlobalSearchPage() {
                           <RoleBadge role={user.role} />
                         </div>
                         <div className="mt-0.5 flex flex-col text-[11px] text-muted-foreground">
-                          <span className="flex items-center gap-1 truncate">
-                            <Mail className="size-3" />
-                            {user.email}
-                          </span>
                           {user.phone && (
                             <span className="flex items-center gap-1 truncate">
                               <Phone className="size-3" />
-                              {user.phone}
+                              {formatPhone(user.phone)}
                             </span>
                           )}
                         </div>

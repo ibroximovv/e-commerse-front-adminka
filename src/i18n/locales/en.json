@@ -58,8 +58,6 @@
   "auth": {
     "loginTitle": "Sign in to admin",
     "loginSubtitle": "Sign in to your account to continue",
-    "email": "Email",
-    "emailPlaceholder": "admin@gmail.com",
     "password": "Password",
     "passwordPlaceholder": "Your password",
     "submit": "Sign in",
@@ -68,30 +66,19 @@
     "hidePassword": "Hide password",
     "welcome": "Welcome back!",
     "sessionExpired": "Your session has expired. Please sign in again.",
-    "forgotPassword": "Forgot password?",
-    "resetPassword": "Reset Password",
-    "sendOtp": "Send Code",
-    "verifyCode": "Verify Code",
-    "code": "6-digit verification code",
-    "codePlaceholder": "123456",
-    "newPassword": "New password",
-    "newPasswordPlaceholder": "At least 6 characters",
-    "backToLogin": "Back to login",
-    "otpSent": "Verification code has been sent to your email",
-    "passwordResetSuccess": "Password updated successfully! Sign in with your new password.",
     "errors": {
-      "invalidCredentials": "Invalid email or password",
-      "notVerified": "Account is not verified",
+      "invalidCredentials": "Invalid phone number or password",
       "notAdmin": "This account is not an admin — access denied",
-      "generic": "Sign-in failed. Please try again."
+      "generic": "Sign-in failed. Please try again.",
+      "tooManyAttempts": "Too many attempts. Try again in 15 minutes."
     },
     "validation": {
-      "emailRequired": "Enter your email",
-      "emailInvalid": "Invalid email format",
       "passwordRequired": "Enter your password",
-      "passwordMin": "Password must be at least 6 characters",
-      "codeRequired": "Enter 6-digit code"
-    }
+      "phoneRequired": "Enter your phone number",
+      "phoneInvalid": "Invalid phone number (e.g. +998 90 123 45 67)"
+    },
+    "phone": "Phone number",
+    "phonePlaceholder": "+998 90 123 45 67"
   },
   "profile": {
     "title": "Profile",
@@ -102,12 +89,8 @@
     "fullNamePlaceholder": "First Last",
     "phone": "Phone",
     "phonePlaceholder": "+998901234567",
-    "email": "Email",
-    "emailHint": "Email cannot be changed",
     "role": "Role",
     "roleHint": "Role cannot be changed through the API",
-    "verified": "Verified",
-    "notVerified": "Not verified",
     "memberSince": "Member since",
     "photo": "Photo",
     "uploadPhoto": "Upload photo",
@@ -127,10 +110,14 @@
     "passwordFailed": "Could not change password",
     "validation": {
       "oldRequired": "Enter your current password",
-      "newMin": "New password must be at least 6 characters",
+      "newMin": "New password must be at least 8 characters",
       "mismatch": "Passwords do not match",
       "sameAsOld": "New password must differ from the current one"
-    }
+    },
+    "passwordRules": "Password must be at least 8 characters and differ from the current one.",
+    "phoneChangeWarning": "Your phone number is your login. After saving, sign in with the new number.",
+    "unsavedChanges": "Unsaved changes",
+    "lastUpdated": "Last updated: {{date}}"
   },
   "upload": {
     "tooLarge": "File must not exceed 5MB",
@@ -177,8 +164,7 @@
     "topProductsEmpty": "No data available yet",
     "paidRevenue": "Paid",
     "deliveredCount": "Delivered",
-    "lowStock": "Low stock",
-    "verifiedUsers": "Verified"
+    "lowStock": "Low stock"
   },
   "search": {
     "title": "Global Search & Filters",
@@ -263,15 +249,12 @@
     "editUser": "Edit user",
     "name": "User",
     "noName": "No name set",
-    "email": "Email",
     "phone": "Phone",
     "role": "Role",
-    "verification": "Verification",
     "language": "Language",
     "registered": "Registered",
-    "searchPlaceholder": "Name, email or phone",
+    "searchPlaceholder": "Name or phone",
     "allRoles": "All roles",
-    "allVerification": "All statuses",
     "totalCount": "Total: {{value}}",
     "empty": "No users",
     "emptyHint": "Registered users will show up here.",
@@ -281,8 +264,11 @@
     "roleUpdated": "User role updated",
     "deletedSuccess": "User deleted",
     "cannotDeleteSelf": "You cannot delete your own account",
-    "readOnlyHint": "Email and verification status cannot be changed through the API.",
-    "roleNotice": "You can manage user roles as an administrator."
+    "roleNotice": "You can manage user roles as an administrator.",
+    "credentialsChangeWarning": "Customers sign in with phone number and name. After saving, they must use the new details.",
+    "validation": {
+      "nameMin": "Name must be at least 2 characters"
+    }
   },
   "payment": {
     "title": "Payments",
@@ -453,7 +439,8 @@
       "priceRequired": "Enter valid price",
       "categoryRequired": "Select category",
       "stockInvalid": "Stock quantity must not be negative",
-      "discountInvalid": "Discount price must be less than base price"
+      "discountInvalid": "Discount price must be less than base price",
+      "priceInteger": "Price must be a whole number of UZS"
     },
     "searchPlaceholder": "Search by name or description",
     "slugPlaceholder": "e.g. cable-2m",

@@ -25,8 +25,8 @@ export function useLogin() {
   const navigate = useNavigate()
 
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      login(email, password),
+    mutationFn: ({ phone, password }: { phone: string; password: string }) =>
+      login(phone, password),
     onSuccess: (user: User) => {
       qc.setQueryData(PROFILE_KEY, user)
       navigate('/', { replace: true })

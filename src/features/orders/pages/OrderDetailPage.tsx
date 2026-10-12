@@ -1,6 +1,6 @@
 import { Button } from 'dgz-ui/button'
 import { useDocumentTitle } from 'dgz-ui-shared/hooks'
-import { ArrowLeft, CreditCard, ListChecks, Mail, Phone, UserCircle, Copy, Check } from 'lucide-react'
+import { ArrowLeft, CreditCard, ListChecks, Phone, UserCircle, Copy, Check } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -15,6 +15,7 @@ import { SectionCard } from '@/components/ui/SectionCard'
 import { OrderStatusBadge, PaymeStateBadge, PaymentStatusBadge } from '@/components/ui/StatusBadge'
 import { ErrorState, Skeleton } from '@/components/ui/States'
 import { fileUrl } from '@/lib/api'
+import { formatPhone } from '@/lib/phone'
 import { errorMessage, formatDateTime, formatPrice, initials, shortId } from '@/lib/utils'
 
 export function OrderDetailPage() {
@@ -142,7 +143,7 @@ export function OrderDetailPage() {
                     />
                   ) : (
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-xs font-semibold text-foreground">
-                      {initials(user.full_name, user.email)}
+                      {initials(user.full_name)}
                     </span>
                   )}
                   <div className="min-w-0">
@@ -151,7 +152,7 @@ export function OrderDetailPage() {
                     </p>
                     <button
                       type="button"
-                      onClick={() => navigate(`/users?search=${encodeURIComponent(user.email)}`)}
+                      onClick={() => navigate(`/users?search=${encodeURIComponent(user.phone ?? user.full_name)}`)}
                       className="text-xs text-brand hover:underline"
                     >
                       {t('order.viewCustomer')}
@@ -160,27 +161,22 @@ export function OrderDetailPage() {
                 </div>
 
                 <div className="space-y-1.5 pt-1 border-t border-border/40 text-xs">
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <Mail className="size-3 text-muted-foreground" aria-hidden />
-                      <span className="truncate max-w-[170px]">{user.email}</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(user.email, t('common.copied'))}
-                      className="p-0.5 hover:text-foreground"
-                      title={t('common.copy')}
-                    >
-                      <Copy className="size-3" />
-                    </button>
-                  </div>
-
                   {(order.customer_phone || user.phone) && (
                     <div className="flex items-center justify-between text-muted-foreground">
                       <span className="flex items-center gap-1.5">
                         <Phone className="size-3 text-muted-foreground" aria-hidden />
-                        <span>{order.customer_phone || user.phone}</span>
+                        <span>{formatPhone(order.customer_phone || user.phone)}</span>
                       </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          copyToClipboard(order.customer_phone || user.phone || '', t('common.copied'))
+                        }
+                        className="ml-auto mr-2 p-0.5 hover:text-foreground"
+                        title={t('common.copy')}
+                      >
+                        <Copy className="size-3" />
+                      </button>
                       <a
                         href={`tel:${order.customer_phone || user.phone}`}
                         className="text-brand hover:underline text-[11px]"

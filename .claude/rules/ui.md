@@ -169,9 +169,9 @@ confirm({ onConfirm: () => remove.mutate(id) });
 `react-hook-form` + `zod`. Kutubxonaning `My*` komponentlari `control` va `name` oladi:
 
 ```tsx
-<MyInput control={control} name="email" label={t('auth.email')} required />
+<MyInput control={control} name="phone" type="tel" label={t('auth.phone')} required />
 ```
 
-- Validatsiya qoidalari backend DTO'lariga mos bo'lsin (masalan parol ≥ 6 belgi) — foydalanuvchi 400 xatosini kutib o'tirmasin.
+- Validatsiya qoidalari backend DTO'lariga mos bo'lsin (masalan yangi parol ≥ 8 belgi, narx — butun son) — foydalanuvchi 400 xatosini kutib o'tirmasin.
 - Yuborilayotgan tiplar to'g'ri bo'lsin: `price` — `Number`, string emas.
 - Formani yuborayotganda submit tugmasi `disabled` + loader holatida bo'lsin.

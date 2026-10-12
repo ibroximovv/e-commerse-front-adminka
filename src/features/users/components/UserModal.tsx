@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Badge } from 'dgz-ui/badge'
 import { Button } from 'dgz-ui/button'
 import { Form } from 'dgz-ui/form'
 import { MyInput } from 'dgz-ui-shared/components/form'
 import { MyModal } from 'dgz-ui-shared/components/modal'
-import { Loader2 } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -13,18 +12,17 @@ import { z } from 'zod'
 import { useUserMutations } from '../hooks'
 import { AvatarUpload } from '@/components/ui/AvatarUpload'
 import { LANGUAGES } from '@/i18n'
+import { isValidPhone, normalizePhone } from '@/lib/phone'
 import type { Language, Role, User } from '@/lib/types'
 import { errorMessage } from '@/lib/utils'
 
-const schema = z.object({
-  full_name: z.string().max(120).optional(),
-  phone: z.string().max(32).optional(),
-  photo: z.string().optional(),
-  language: z.enum(['uz', 'ru', 'en']),
-  role: z.enum(['ADMIN', 'USER']),
-})
-
-type FormValues = z.infer<typeof schema>
+type FormValues = {
+  full_name: string
+  phone: string
+  photo?: string
+  language: Language
+  role: Role
+}
 
 export function UserModal({
   isOpen,
@@ -37,6 +35,20 @@ export function UserModal({
 }) {
   const { t } = useTranslation()
   const { update, updateRole } = useUserMutations()
+
+  /*
+   * Phone + name are the customer's login credentials. Phone stays optional:
+   * legacy users migrated without a phone can't log in until an admin adds one.
+   */
+  const schema = z.object({
+    full_name: z.string().trim().min(2, t('user.validation.nameMin')).max(100),
+    phone: z
+      .string()
+      .refine((v) => !v.trim() || isValidPhone(v), t('auth.validation.phoneInvalid')),
+    photo: z.string().optional(),
+    language: z.enum(['uz', 'ru', 'en']),
+    role: z.enum(['ADMIN', 'USER']),
+  })
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -53,13 +65,19 @@ export function UserModal({
   const photo = useWatch({ control, name: 'photo' })
   const language = useWatch({ control, name: 'language' })
   const role = useWatch({ control, name: 'role' })
+  const fullName = useWatch({ control, name: 'full_name' })
+  const phone = useWatch({ control, name: 'phone' })
+  const isCredentialChanged =
+    !!user &&
+    (normalizePhone(phone) !== normalizePhone(user.phone) ||
+      fullName.trim() !== (user.full_name ?? '').trim())
 
   useEffect(() => {
     if (isOpen && user) {
       reset({
         full_name: user.full_name ?? '',
         phone: user.phone ?? '',
-        photo: user.photo,
+        photo: user.photo ?? undefined,
         language: user.language,
         role: user.role,
       })
@@ -79,8 +97,9 @@ export function UserModal({
       await update.mutateAsync({
         id: user.id,
         body: {
-          full_name: values.full_name?.trim() || undefined,
-          phone: values.phone?.trim() || undefined,
+          full_name: values.full_name.trim(),
+          // Empty = leave as is; the API has no way to clear a phone.
+          phone: normalizePhone(values.phone) ?? undefined,
           photo: values.photo,
           language: values.language,
         },
@@ -109,7 +128,6 @@ export function UserModal({
               value={photo}
               onChange={(path) => setValue('photo', path, { shouldDirty: true })}
               name={user.full_name}
-              email={user.email}
             />
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -118,14 +136,27 @@ export function UserModal({
                 name="full_name"
                 label={t('user.name')}
                 placeholder={t('profile.fullNamePlaceholder')}
+                required
               />
               <MyInput
                 control={control}
                 name="phone"
+                type="tel"
+                inputMode="tel"
                 label={t('user.phone')}
                 placeholder={t('profile.phonePlaceholder')}
               />
             </div>
+
+            {isCredentialChanged ? (
+              <p
+                role="status"
+                className="flex items-start gap-2 rounded-lg border border-border bg-warning-muted p-2.5 text-xs text-warning"
+              >
+                <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                {t('user.credentialsChangeWarning')}
+              </p>
+            ) : null}
 
             {/* Role selector */}
             <div className="space-y-1.5">
@@ -173,27 +204,6 @@ export function UserModal({
                     {t(`language.${code}`)}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Non-editable fields */}
-            <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">{t('user.email')}</span>
-                <span className="break-all text-right font-medium text-foreground font-mono">
-                  {user.email}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">{t('user.verification')}</span>
-                <Badge
-                  type="status"
-                  variant={user.is_verified ? 'green' : 'orange'}
-                  rounded="full"
-                >
-                  {user.is_verified ? t('profile.verified') : t('profile.notVerified')}
-                </Badge>
               </div>
             </div>
 

@@ -1,9 +1,9 @@
-import { Badge } from 'dgz-ui/badge'
 import { Button } from 'dgz-ui/button'
 import type { ColumnType } from 'dgz-ui-shared/types'
 import { Edit, Trash2 } from 'lucide-react'
 import { RoleBadge } from '@/components/ui/StatusBadge'
 import { fileUrl } from '@/lib/api'
+import { formatPhone } from '@/lib/phone'
 import type { Language, Role, User } from '@/lib/types'
 import { formatDate, initials } from '@/lib/utils'
 
@@ -37,7 +37,7 @@ export function getUserColumns({
             />
           ) : (
             <span className="flex size-8.5 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-brand/10 text-xs font-bold text-brand">
-              {initials(record.full_name, record.email)}
+              {initials(record.full_name)}
             </span>
           )}
 
@@ -45,7 +45,6 @@ export function getUserColumns({
             <p className="truncate text-xs font-semibold text-foreground">
               {record.full_name || t('user.noName')}
             </p>
-            <p className="truncate text-[11px] text-muted-foreground">{record.email}</p>
           </div>
         </div>
       ),
@@ -54,9 +53,10 @@ export function getUserColumns({
       key: 'phone',
       dataIndex: 'phone',
       name: t('user.phone'),
-      render: (val?: string) => (
-        <span className="whitespace-nowrap text-xs text-muted-foreground">
-          {val || '—'}
+      sortable: true,
+      render: (val: string | null) => (
+        <span className="whitespace-nowrap font-mono text-xs text-foreground">
+          {val ? formatPhone(val) : '—'}
         </span>
       ),
     },
@@ -66,17 +66,6 @@ export function getUserColumns({
       name: t('user.role'),
       sortable: true,
       render: (val: Role) => <RoleBadge role={val} />,
-    },
-    {
-      key: 'is_verified',
-      dataIndex: 'is_verified',
-      name: t('user.verification'),
-      sortable: true,
-      render: (val: boolean) => (
-        <Badge type="status" variant={val ? 'green' : 'orange'} rounded="full">
-          {val ? t('profile.verified') : t('profile.notVerified')}
-        </Badge>
-      ),
     },
     {
       key: 'language',

@@ -30,14 +30,16 @@ export type OrderStatus =
 
 export type PaymentStatus = 'PENDING' | 'SUCCESSFUL' | 'FAILED' | 'REFUNDED'
 
+/**
+ * Auth is phone-based now: `email` and `is_verified` were removed from the
+ * backend. `phone` is E.164 (`+998901234567`) and doubles as the login key.
+ */
 export interface User {
   id: string
-  email: string
-  full_name?: string
-  phone?: string
-  photo?: string
+  full_name: string
+  phone: string | null
+  photo?: string | null
   role: Role
-  is_verified: boolean
   language: Language
   created_at: string
   updated_at: string
@@ -278,7 +280,6 @@ export interface AuthResponse {
 
 export interface UserStats {
   total_users: number
-  verified_users: number
   admins_count?: number
   regular_users?: number
 }
@@ -312,7 +313,6 @@ export interface DashboardStats {
   }
   users: {
     total_users: number
-    verified_users: number
   }
   monthly_sales: DashboardMonthlySales[]
   recent_orders: Order[]
@@ -344,6 +344,8 @@ export interface Envelope<T> {
   message?: string | null
   meta?: Meta | null
   language?: Language
+  /** All amounts are whole UZS (no tiyin). */
+  currency?: 'UZS'
 }
 
 /**

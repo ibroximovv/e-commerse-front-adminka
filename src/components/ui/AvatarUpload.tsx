@@ -18,12 +18,10 @@ export function AvatarUpload({
   value,
   onChange,
   name,
-  email,
 }: {
   value?: string
   onChange: (path: string | undefined) => void
   name?: string
-  email?: string
 }) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -59,7 +57,7 @@ export function AvatarUpload({
         <Avatar className="size-20">
           <AvatarImage src={fileUrl(value)} alt="" />
           <AvatarFallback className="bg-brand-muted text-lg font-medium text-brand">
-            {initials(name, email)}
+            {initials(name)}
           </AvatarFallback>
         </Avatar>
 

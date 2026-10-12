@@ -34,8 +34,16 @@ const schema = z.object({
   sku: z.string().optional().nullable(),
   brand: z.string().optional().nullable(),
   description: localized,
-  price: z.coerce.number().min(0, 'product.validation.priceRequired'),
-  discount_price: z.coerce.number().optional().nullable(),
+  // Prices are whole UZS — backend rejects fractions with 400 (@IsInt)
+  price: z.coerce
+    .number()
+    .min(0, 'product.validation.priceRequired')
+    .int('product.validation.priceInteger'),
+  discount_price: z.coerce
+    .number()
+    .int('product.validation.priceInteger')
+    .optional()
+    .nullable(),
   price_on_request: z.boolean(),
   stock: z.coerce.number().min(0, 'product.validation.stockInvalid'),
   category_id: z.string().min(1, 'product.validation.categoryRequired'),
@@ -345,7 +353,8 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
                   name="price"
                   type="number"
                   min="0"
-                  step="0.01"
+                  step="1"
+                  inputMode="numeric"
                   label={t('product.price')}
                   disabled={priceOnRequest}
                   required={!priceOnRequest}
@@ -357,7 +366,8 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
                   name="discount_price"
                   type="number"
                   min="0"
-                  step="0.01"
+                  step="1"
+                  inputMode="numeric"
                   label={t('product.discountPrice')}
                   disabled={priceOnRequest}
                 />

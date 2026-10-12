@@ -1,22 +1,13 @@
-import { get, post } from '@/lib/api'
+import { ApiError, get, post } from '@/lib/api'
 import { tokens } from '@/lib/tokens'
 import type { AuthResponse, Tokens, User } from '@/lib/types'
 
 export const authApi = {
-  login: (email: string, password: string) =>
-    post<AuthResponse | Tokens>('/api/auth/login', { email, password }),
+  // Admins log in with phone + password; `full_name` is ignored for ADMIN.
+  login: (phone: string, password: string) =>
+    post<AuthResponse | Tokens>('/api/auth/login', { phone, password }),
 
   profile: () => get<User>('/api/users/profile'),
-
-  forgotPassword: (email: string) =>
-    post<{ message?: string }>('/api/auth/forgot-password', { email }),
-
-  resetPassword: (email: string, code: string, new_password: string) =>
-    post<{ message?: string }>('/api/auth/reset-password', {
-      email,
-      code,
-      new_password,
-    }),
 
   logout: () => post<void>('/api/auth/logout'),
 
@@ -27,7 +18,7 @@ export const authApi = {
 /** Login rad etilishining aniq sababi — foydalanuvchiga to'g'ri xabar berish uchun. */
 export type LoginFailure =
   | 'invalidCredentials'
-  | 'notVerified'
+  | 'tooManyAttempts'
   | 'notAdmin'
   | 'generic'
 
@@ -41,12 +32,18 @@ export class LoginError extends Error {
   }
 }
 
+/*
+ * Backend translates `message` by `?ln`, so matching English text breaks in
+ * uz/ru. The status code is stable: 401 = wrong phone/password (deliberately
+ * the same response whether the phone exists or not), 429 = 5 failures in
+ * 15 min, 403 = not an ADMIN.
+ */
 function classify(error: unknown): LoginFailure {
-  const message = error instanceof Error ? error.message.toLowerCase() : ''
+  const status = error instanceof ApiError ? error.status : undefined
 
-  if (message.includes('not verified')) return 'notVerified'
-  if (message.includes('invalid credentials')) return 'invalidCredentials'
-  if (message.includes('forbidden')) return 'notAdmin'
+  if (status === 401) return 'invalidCredentials'
+  if (status === 429) return 'tooManyAttempts'
+  if (status === 403) return 'notAdmin'
   return 'generic'
 }
 
@@ -56,11 +53,11 @@ function classify(error: unknown): LoginFailure {
  *
  * Backend endi login'da to'g'ridan-to'g'ri user obyektini qaytaradi.
  */
-export async function login(email: string, password: string): Promise<User> {
+export async function login(phone: string, password: string): Promise<User> {
   let issued: AuthResponse | Tokens
 
   try {
-    issued = await authApi.login(email, password)
+    issued = await authApi.login(phone, password)
   } catch (error) {
     throw new LoginError(classify(error))
   }

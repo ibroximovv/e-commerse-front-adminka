@@ -93,20 +93,30 @@ throw new Error(Array.isArray(raw) ? raw.join(', ') : raw);
 
 ## 5. Auth
 
+Email/OTP butunlay olib tashlangan (batafsil: `../e-commerse-back/docs/front-changes-phone-auth.md`).
+
 | Metod | Yo'l | Izoh |
 |---|---|---|
-| POST | `/api/auth/login` | `{ email, password }` → `{ user, access_token, refresh_token }` |
+| POST | `/api/auth/login` | Admin: `{ phone, password }` → `{ user, access_token, refresh_token }` |
 | POST | `/api/auth/refresh` | `{ refresh_token }` → yangi juftlik |
-| POST | `/api/auth/forgot-password` | `{ email }` → parolni tiklash kodi yuboriladi |
-| POST | `/api/auth/reset-password` | `{ email, code, new_password }` → yangi parol o'rnatiladi |
 | POST | `/api/auth/logout` | Tokenlarni bekor qilish va tizimdan chiqish |
-| POST | `/api/auth/change-password` | `{ old_password, new_password }`, token kerak |
+| POST | `/api/auth/change-password` | `{ old_password, new_password }`, **faqat ADMIN**, yangi parol ≥ **8** |
 | GET | `/api/users/profile` | Joriy foydalanuvchi — **rolni shu yerdan oling** |
 
+- `forgot-password`, `reset-password`, `verify`, `resend-code` — **o'chirilgan (404)**.
+- `user` da `email` va `is_verified` **yo'q**. `phone` — E.164 (`+998901234567`), login kaliti.
+  Telefon `lib/phone.ts` orqali normallashtiriladi va ko'rsatiladi (`normalizePhone`, `formatPhone`, `phoneMatches`).
+- Mijoz telefon + **ism** bilan kiradi (parolsiz), admin telefon + **parol** bilan. Admin
+  foydalanuvchining ismi yoki telefonini o'zgartirsa — mijozning login ma'lumoti o'zgaradi, formada ogohlantiring.
 - `access_token` — 15 daqiqa. `refresh_token` — 7 kun.
-- Login to'g'ridan-to'g'ri `user` obyektini qaytaradi (avvalgi faqat tokenlar o'rniga).
-- Login rad etilishi: 401 `Invalid credentials` · 401 `Account not verified` · 403 `Forbidden resource` (roli ADMIN emas).
+- Login rad etilishi: 401 (telefon yoki parol noto'g'ri — raqam borligi oshkor qilinmaydi) · 429 (15 daqiqada 5 xato) · 403 (ADMIN emas).
+- ⚠️ Xato `message` lari `?ln` bo'yicha **tarjima qilinadi** — inglizcha matnga qarab tarmoqlamang, `ApiError.status` ishlating.
 - Refresh oqimi bir martalik navbat bilan (`refreshing` promise) — parallel 401'lar bitta refresh kutadi.
+
+## Narxlar
+
+Barcha summalar — **butun so'm (UZS)**, tiyinsiz; konvertda `currency: "UZS"`. `price` va
+`discount_price` `@IsInt` — kasr yuborilsa 400. Ko'rsatish: `formatPrice()` (`1 250 000 so'm`).
 
 ## 6. Endpointlar
 
@@ -126,7 +136,7 @@ Query: `page`, `limit`, `search`, `category_id`, `min_price`, `max_price`, `sort
 
 Body: `{ name: {uz,ru,en}, description?, price: number, stock?, images?, category_id, tags?, attributes?, price_on_request?, ikpu_code?, package_code?, vat_percent?, units? }`. PATCH da hammasi ixtiyoriy + `is_archived?`.
 
-- `price` — `Float`. `Number` yuboring, string emas (`"999.99"` validatsiyadan o'tmaydi).
+- `price` — **butun son** (UZS). `Number` yuboring, string ham, kasr ham emas.
 - `price_on_request: true` bo'lsa narx maydonlari bloklanadi va mahsulotni buyurtma qilib bo'lmaydi.
 - `attributes` — `[{ key: {uz,ru,en}, value: {…}, unit?: {…} }]`. **PATCH da massiv to'liq almashtiriladi**, shuning uchun tahrirlashda hamma qatorni qayta yuboring. O'lchov birligini `key` ichiga yozmang (`"Uzunlik (m)"` ❌) — `unit` alohida. Sonli qiymat uchala tilda bir xil bo'lsin, aks holda faset ikkiga bo'linadi.
 - Fiskalizatsiya — pastdagi alohida bo'limga qarang. Mahsulotdagi to'rt maydon faqat **qoplash** uchun.
@@ -167,7 +177,7 @@ umumiy `components/ui/FiscalSection` — kategoriya formasida ochiq, mahsulotda 
 va kategoriyaning qiymati placeholder sifatida. Kodi yo'q kategoriya ro'yxatda
 **qizil belgilanadi**.
 
-**Users** `/api/users` — GET `/profile` 🔑, PATCH `/profile` 🔑, GET 👑 (`?page=1&limit=10&role=USER&search=...`), GET `/stats` 👑, GET `/:id` 👑, PATCH `/:id` 👑, PATCH `/:id/role` 👑 (`{ role: 'ADMIN' | 'USER' }`), DELETE `/:id` 👑
+**Users** `/api/users` — GET `/profile` 🔑, PATCH `/profile` 🔑, GET 👑 (`?page=1&limit=10&role=USER&search=...`, `search` — ism yoki telefon, `sortBy=phone`; `email` yo'q), GET `/stats` 👑 (`verified_users` yo'q), GET `/:id` 👑, PATCH `/:id` 👑, PATCH `/:id/role` 👑 (`{ role: 'ADMIN' | 'USER' }`), DELETE `/:id` 👑
 
 Tahrirlanadigan maydonlar: `full_name`, `phone`, `photo`, `language`. Admin tomonidan rol o'zgartirish `PATCH /api/users/:id/role` orqali amalga oshiriladi. `language` ∈ `uz|ru|en`.
 

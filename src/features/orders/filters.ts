@@ -1,5 +1,6 @@
 import type { OrderFilters } from './types'
 import type { Order } from '@/lib/types'
+import { phoneMatches } from '@/lib/phone'
 import { dayjs } from '@/lib/utils'
 
 /**
@@ -22,17 +23,16 @@ export function filterOrders(orders: Order[], filters: OrderFilters): Order[] {
     }
 
     if (query) {
-      const haystack = [
-        order.id,
-        order.user?.full_name,
-        order.user?.email,
-        order.user?.phone,
-      ]
+      const haystack = [order.id, order.user?.full_name, order.customer_name]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
 
-      if (!haystack.includes(query)) return false
+      // Phones are compared by digits so "90 123" finds "+998901234567"
+      const isPhoneHit =
+        phoneMatches(order.user?.phone, query) || phoneMatches(order.customer_phone, query)
+
+      if (!haystack.includes(query) && !isPhoneHit) return false
     }
 
     return true

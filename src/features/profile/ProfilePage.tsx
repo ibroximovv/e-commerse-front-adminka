@@ -7,9 +7,9 @@ import {
   Check,
   Globe,
   Loader2,
-  Mail,
+  Phone,
   Shield,
-  ShieldCheck,
+  AlertTriangle,
   UserCircle,
   Save,
 } from 'lucide-react'
@@ -27,16 +27,15 @@ import { ErrorState, Skeleton } from '@/components/ui/States'
 import { useProfile } from '@/features/auth/hooks'
 import { LANGUAGES } from '@/i18n'
 import { useChangeLanguage } from '@/i18n/useChangeLanguage'
+import { formatPhone, isValidPhone, normalizePhone } from '@/lib/phone'
 import type { Language } from '@/lib/types'
 import { cn, errorMessage, formatDate, formatDateTime } from '@/lib/utils'
 
-const schema = z.object({
-  full_name: z.string().max(120).optional(),
-  phone: z.string().max(32).optional(),
-  photo: z.string().optional(),
-})
-
-type FormValues = z.infer<typeof schema>
+type FormValues = {
+  full_name: string
+  phone: string
+  photo?: string
+}
 
 const LANGUAGE_FLAGS: Record<Language, string> = {
   uz: "🇺🇿 O'zbekcha",
@@ -50,6 +49,16 @@ export function ProfilePage() {
   const updateProfile = useUpdateProfile()
   const changeLanguage = useChangeLanguage()
 
+  /*
+   * Phone is the admin's login key — an empty or broken one would lock the
+   * account out, so both fields are required (backend: full_name 2–100).
+   */
+  const schema = z.object({
+    full_name: z.string().trim().min(2, t('user.validation.nameMin')).max(100),
+    phone: z.string().refine(isValidPhone, t('auth.validation.phoneInvalid')),
+    photo: z.string().optional(),
+  })
+
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { full_name: '', phone: '', photo: undefined },
@@ -57,19 +66,21 @@ export function ProfilePage() {
       ? {
           full_name: user.full_name ?? '',
           phone: user.phone ?? '',
-          photo: user.photo,
+          photo: user.photo ?? undefined,
         }
       : undefined,
   })
   const { control, handleSubmit, setValue, formState: { isDirty } } = form
 
   const photo = useWatch({ control, name: 'photo' })
+  const phone = useWatch({ control, name: 'phone' })
+  const isPhoneChanged = !!user && normalizePhone(phone) !== normalizePhone(user.phone)
 
   const onSubmit = handleSubmit((values) => {
     updateProfile.mutate(
       {
-        full_name: values.full_name?.trim() || undefined,
-        phone: values.phone?.trim() || undefined,
+        full_name: values.full_name.trim(),
+        phone: normalizePhone(values.phone) ?? values.phone,
         photo: values.photo,
       },
       {
@@ -112,7 +123,6 @@ export function ProfilePage() {
             value={photo}
             onChange={(path) => setValue('photo', path, { shouldDirty: true })}
             name={user.full_name}
-            email={user.email}
           />
 
           <div className="space-y-1">
@@ -121,24 +131,18 @@ export function ProfilePage() {
                 {user.full_name || t('user.noName')}
               </h2>
               <RoleBadge role={user.role} />
-              <span
-                className={`inline-flex items-center gap-1 rounded px-2 py-0.2 text-[11px] font-medium ${
-                  user.is_verified
-                    ? 'bg-muted text-foreground'
-                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                }`}
-              >
-                <ShieldCheck className="size-3" />
-                {user.is_verified ? t('profile.verified') : t('profile.notVerified')}
-              </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Mail className="size-3 text-muted-foreground" />
-                {user.email}
-              </span>
-              <span>·</span>
+              {user.phone ? (
+                <>
+                  <span className="flex items-center gap-1">
+                    <Phone className="size-3 text-muted-foreground" />
+                    {formatPhone(user.phone)}
+                  </span>
+                  <span>·</span>
+                </>
+              ) : null}
               <span className="flex items-center gap-1">
                 <Calendar className="size-3" />
                 {t('profile.memberSince')}: {formatDate(user.created_at)}
@@ -164,18 +168,34 @@ export function ProfilePage() {
                     name="full_name"
                     label={t('profile.fullName')}
                     placeholder={t('profile.fullNamePlaceholder')}
+                    required
                   />
                   <MyInput
                     control={control}
                     name="phone"
+                    type="tel"
+                    inputMode="tel"
                     label={t('profile.phone')}
                     placeholder={t('profile.phonePlaceholder')}
+                    required
                   />
                 </div>
 
+                {isPhoneChanged ? (
+                  <p
+                    role="status"
+                    className="flex items-start gap-2 rounded-lg border border-border bg-warning-muted p-2.5 text-xs text-warning"
+                  >
+                    <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                    {t('profile.phoneChangeWarning')}
+                  </p>
+                ) : null}
+
                 <div className="flex items-center justify-between pt-2 border-t border-border/40">
                   <span className="text-xs text-muted-foreground">
-                    {isDirty ? 'O\'zgarishlar kiritildi' : `Oxirgi yangilanish: ${formatDateTime(user.updated_at)}`}
+                    {isDirty
+                      ? t('profile.unsavedChanges')
+                      : t('profile.lastUpdated', { date: formatDateTime(user.updated_at) })}
                   </span>
 
                   <Button

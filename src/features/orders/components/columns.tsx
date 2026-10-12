@@ -3,6 +3,7 @@ import type { ColumnType } from 'dgz-ui-shared/types'
 import { Eye } from 'lucide-react'
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/ui/StatusBadge'
 import type { Order } from '@/lib/types'
+import { formatPhone } from '@/lib/phone'
 import { formatDateTime, formatPrice, initials, shortId } from '@/lib/utils'
 
 interface ColumnCallbacks {
@@ -29,15 +30,15 @@ export function getOrderColumns({ onView, t }: ColumnCallbacks): ColumnType<Orde
       render: (_: string, record: Order) => (
         <div className="flex items-center gap-2.5">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-brand/10 text-xs font-bold text-brand">
-            {initials(record.user?.full_name, record.user?.email)}
+            {initials(record.user?.full_name)}
           </span>
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold text-foreground">
-              {record.user?.full_name || record.user?.email || t('common.none')}
+              {record.user?.full_name || record.customer_name || t('common.none')}
             </p>
-            {record.user?.full_name && record.user.email ? (
-              <p className="truncate text-[11px] text-muted-foreground">
-                {record.user.email}
+            {record.user?.phone || record.customer_phone ? (
+              <p className="truncate font-mono text-[11px] text-muted-foreground">
+                {formatPhone(record.user?.phone || record.customer_phone)}
               </p>
             ) : null}
           </div>

@@ -81,7 +81,6 @@ export function DashboardPage() {
         <StatCard
           label={t('dashboard.totalUsers')}
           value={formatNumber(stats.users?.total_users ?? 0)}
-          hint={`${t('dashboard.verifiedUsers')}: ${stats.users?.verified_users ?? 0}`}
           icon={Users}
         />
       </div>

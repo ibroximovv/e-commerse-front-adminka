@@ -58,8 +58,6 @@
   "auth": {
     "loginTitle": "Adminkaga kirish",
     "loginSubtitle": "Davom etish uchun hisobingizga kiring",
-    "email": "Elektron pochta",
-    "emailPlaceholder": "admin@gmail.com",
     "password": "Parol",
     "passwordPlaceholder": "Parolingiz",
     "submit": "Kirish",
@@ -68,30 +66,19 @@
     "hidePassword": "Parolni yashirish",
     "welcome": "Xush kelibsiz!",
     "sessionExpired": "Sessiya tugadi. Iltimos, qaytadan kiring.",
-    "forgotPassword": "Parolni unutdingizmi?",
-    "resetPassword": "Parolni tiklash",
-    "sendOtp": "Kodni yuborish",
-    "verifyCode": "Kodni tasdiqlash",
-    "code": "6 xonali tasdiqlash kodi",
-    "codePlaceholder": "123456",
-    "newPassword": "Yangi parol",
-    "newPasswordPlaceholder": "Kamida 6 ta belgi",
-    "backToLogin": "Kirish sahifasiga qaytish",
-    "otpSent": "Tasdiqlash kodi emailingizga yuborildi",
-    "passwordResetSuccess": "Parol muvaffaqiyatli yangilandi! Yangi parol bilan kiring.",
     "errors": {
-      "invalidCredentials": "Email yoki parol noto'g'ri",
-      "notVerified": "Hisob tasdiqlanmagan",
+      "invalidCredentials": "Telefon raqami yoki parol noto'g'ri",
       "notAdmin": "Bu hisob admin emas — adminkaga kirish huquqi yo'q",
-      "generic": "Kirishda xatolik yuz berdi. Qaytadan urinib ko'ring."
+      "generic": "Kirishda xatolik yuz berdi. Qaytadan urinib ko'ring.",
+      "tooManyAttempts": "Juda ko'p urinish. 15 daqiqadan so'ng qayta urinib ko'ring."
     },
     "validation": {
-      "emailRequired": "Email kiriting",
-      "emailInvalid": "Email formati noto'g'ri",
       "passwordRequired": "Parol kiriting",
-      "passwordMin": "Parol kamida 6 belgidan iborat bo'lsin",
-      "codeRequired": "6 xonali kodni kiriting"
-    }
+      "phoneRequired": "Telefon raqamini kiriting",
+      "phoneInvalid": "Telefon raqami noto'g'ri (masalan: +998 90 123 45 67)"
+    },
+    "phone": "Telefon raqami",
+    "phonePlaceholder": "+998 90 123 45 67"
   },
   "profile": {
     "title": "Profil",
@@ -102,12 +89,8 @@
     "fullNamePlaceholder": "Ism Familiya",
     "phone": "Telefon",
     "phonePlaceholder": "+998901234567",
-    "email": "Elektron pochta",
-    "emailHint": "Emailni o'zgartirib bo'lmaydi",
     "role": "Rol",
     "roleHint": "Rolni API orqali o'zgartirib bo'lmaydi",
-    "verified": "Tasdiqlangan",
-    "notVerified": "Tasdiqlanmagan",
     "memberSince": "Ro'yxatdan o'tgan",
     "photo": "Surat",
     "uploadPhoto": "Surat yuklash",
@@ -127,10 +110,14 @@
     "passwordFailed": "Parolni o'zgartirib bo'lmadi",
     "validation": {
       "oldRequired": "Joriy parolni kiriting",
-      "newMin": "Yangi parol kamida 6 belgidan iborat bo'lsin",
+      "newMin": "Yangi parol kamida 8 belgidan iborat bo'lsin",
       "mismatch": "Parollar mos kelmadi",
       "sameAsOld": "Yangi parol joriy paroldan farq qilsin"
-    }
+    },
+    "passwordRules": "Parol kamida 8 ta belgidan iborat bo'lishi va avvalgi paroldan farq qilishi lozim.",
+    "phoneChangeWarning": "Telefon raqami — kirish uchun login. Saqlaganingizdan so'ng keyingi safar yangi raqam bilan kirasiz.",
+    "unsavedChanges": "O'zgarishlar kiritildi",
+    "lastUpdated": "Oxirgi yangilanish: {{date}}"
   },
   "upload": {
     "tooLarge": "Fayl hajmi 5MB dan oshmasin",
@@ -177,8 +164,7 @@
     "topProductsEmpty": "Hozircha ma'lumot yo'q",
     "paidRevenue": "To'langan",
     "deliveredCount": "Yetkazilgan",
-    "lowStock": "Kam qolgan",
-    "verifiedUsers": "Tasdiqlangan"
+    "lowStock": "Kam qolgan"
   },
   "search": {
     "title": "Global Qidiruv va Filtrlar",
@@ -263,15 +249,12 @@
     "editUser": "Foydalanuvchini tahrirlash",
     "name": "Foydalanuvchi",
     "noName": "Ism kiritilmagan",
-    "email": "Elektron pochta",
     "phone": "Telefon",
     "role": "Rol",
-    "verification": "Tasdiqlash",
     "language": "Til",
     "registered": "Ro'yxatdan o'tgan",
-    "searchPlaceholder": "Ism, email yoki telefon",
+    "searchPlaceholder": "Ism yoki telefon",
     "allRoles": "Barcha rollar",
-    "allVerification": "Barcha holatlar",
     "totalCount": "Jami: {{value}}",
     "empty": "Foydalanuvchi yo'q",
     "emptyHint": "Ro'yxatdan o'tgan foydalanuvchilar shu yerda ko'rinadi.",
@@ -281,8 +264,11 @@
     "roleUpdated": "Foydalanuvchi roli o'zgartirildi",
     "deletedSuccess": "Foydalanuvchi o'chirildi",
     "cannotDeleteSelf": "O'z hisobingizni o'chira olmaysiz",
-    "readOnlyHint": "Email va tasdiqlash holatini API orqali o'zgartirib bo'lmaydi.",
-    "roleNotice": "Foydalanuvchi rolini administrator sifatida boshqarishingiz mumkin."
+    "roleNotice": "Foydalanuvchi rolini administrator sifatida boshqarishingiz mumkin.",
+    "credentialsChangeWarning": "Mijoz telefon raqami va ism bilan kiradi. Saqlangandan so'ng u keyingi safar yangi ma'lumotlar bilan kirishi kerak bo'ladi.",
+    "validation": {
+      "nameMin": "Ism kamida 2 ta belgidan iborat bo'lsin"
+    }
   },
   "payment": {
     "title": "To'lovlar",
@@ -453,7 +439,8 @@
       "priceRequired": "To'g'ri narx kiriting",
       "categoryRequired": "Kategoriyani tanlang",
       "stockInvalid": "Zaxira soni manfiy bo'lmasin",
-      "discountInvalid": "Aksiya narxi asosiy narxdan kichik bo'lishi kerak"
+      "discountInvalid": "Aksiya narxi asosiy narxdan kichik bo'lishi kerak",
+      "priceInteger": "Narx butun so'mda bo'lsin (tiyinsiz)"
     },
     "searchPlaceholder": "Nomi yoki tavsifi bo‘yicha qidirish",
     "slugPlaceholder": "masalan: kabel-2m",

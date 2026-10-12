@@ -14,11 +14,9 @@ export interface UserUpdateInput {
 export interface UserFilters {
   search: string
   role: Role | 'ALL'
-  verified: 'ALL' | 'VERIFIED' | 'UNVERIFIED'
 }
 
 export const DEFAULT_USER_FILTERS: UserFilters = {
   search: '',
   role: 'ALL',
-  verified: 'ALL',
 }

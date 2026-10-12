@@ -18,6 +18,7 @@ import { useOrders } from '@/features/orders/hooks'
 import { useProducts } from '@/features/products/hooks'
 import { useUsers } from '@/features/users/hooks'
 import { fileUrl } from '@/lib/api'
+import { formatPhone, phoneMatches } from '@/lib/phone'
 import { formatPrice, shortId } from '@/lib/utils'
 
 interface CommandPaletteProps {
@@ -150,8 +151,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         const idMatch = o.id.toLowerCase().includes(q)
         const userMatch =
           o.user?.full_name?.toLowerCase().includes(q) ||
-          o.user?.email?.toLowerCase().includes(q) ||
-          o.user?.phone?.toLowerCase().includes(q)
+          phoneMatches(o.user?.phone, q)
         return idMatch || userMatch
       })
       .slice(0, 4)
@@ -160,7 +160,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
           id: `order-${o.id}`,
           type: 'order',
           title: `${shortId(o.id)} · ${formatPrice(o.total_amount)}`,
-          subtitle: o.user?.full_name || o.user?.email || 'Guest',
+          subtitle: o.user?.full_name || formatPhone(o.user?.phone) || t('common.none'),
           badge: t(`order.status.${o.status}`),
           icon: ShoppingCart,
           onSelect: () => {
@@ -174,22 +174,20 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     users
       .filter(
         (u) =>
-          u.full_name?.toLowerCase().includes(q) ||
-          u.email?.toLowerCase().includes(q) ||
-          u.phone?.toLowerCase().includes(q),
+          u.full_name?.toLowerCase().includes(q) || phoneMatches(u.phone, q),
       )
       .slice(0, 4)
       .forEach((u) => {
         result.push({
           id: `user-${u.id}`,
           type: 'user',
-          title: u.full_name || u.email,
-          subtitle: u.email,
+          title: u.full_name || formatPhone(u.phone),
+          subtitle: formatPhone(u.phone),
           badge: u.role,
           image: u.photo ? fileUrl(u.photo) : undefined,
           icon: UsersIcon,
           onSelect: () => {
-            navigate(`/users?search=${encodeURIComponent(u.email)}`)
+            navigate(`/users?search=${encodeURIComponent(u.phone ?? u.full_name)}`)
             onClose()
           },
         })

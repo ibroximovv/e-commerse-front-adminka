@@ -18,6 +18,7 @@ import { ConfirmModal, type ConfirmOptions } from '@/components/ui/ConfirmModal'
 import { useProfile } from '@/features/auth/hooks'
 import { paginateLocal, toPagination } from '@/lib/api'
 import type { Role, User } from '@/lib/types'
+import { formatPhone } from '@/lib/phone'
 import { errorMessage } from '@/lib/utils'
 
 export function UsersPage() {
@@ -59,13 +60,6 @@ export function UsersPage() {
   const rawUsers = data?.items
   const users = useMemo(() => rawUsers ?? [], [rawUsers])
 
-  const filtered = useMemo(() => {
-    return users.filter((user) => {
-      if (filters.verified === 'VERIFIED' && !user.is_verified) return false
-      if (filters.verified === 'UNVERIFIED' && user.is_verified) return false
-      return true
-    })
-  }, [users, filters.verified])
 
   const handleEdit = (user: User) => {
     setEditingUser(user)
@@ -75,7 +69,7 @@ export function UsersPage() {
   const handleDelete = (user: User) => {
     openConfirm({
       title: t('common.delete'),
-      description: `${user.full_name || user.email}`,
+      description: [user.full_name, formatPhone(user.phone)].filter(Boolean).join(' · '),
       confirmText: t('common.delete'),
       iconType: 'delete',
       variant: 'danger',
@@ -108,7 +102,7 @@ export function UsersPage() {
   }
 
   const isFiltered =
-    filters.search !== '' || filters.role !== 'ALL' || filters.verified !== 'ALL'
+    filters.search !== '' || filters.role !== 'ALL'
 
   if (isLoading) {
     return (
@@ -124,7 +118,6 @@ export function UsersPage() {
   }
 
   const totalCount = userStats?.total_users ?? data?.meta?.total ?? users.length
-  const verifiedCount = userStats?.verified_users
 
   return (
     <div className="space-y-5">
@@ -133,9 +126,9 @@ export function UsersPage() {
         description={t('user.subtitle')}
         actions={
           <div className="flex items-center gap-2">
-            {verifiedCount !== undefined && (
+            {userStats?.admins_count !== undefined && (
               <span className="rounded bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                {t('profile.verified')}: {verifiedCount}
+                {t('role.ADMIN')}: {userStats.admins_count}
               </span>
             )}
             <span className="rounded bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
@@ -166,19 +159,6 @@ export function UsersPage() {
             <option value="USER">{t('role.USER')}</option>
           </NativeSelect>
 
-          <NativeSelect
-            value={filters.verified}
-            onChange={(e) =>
-              setFilter('verified', e.target.value as UserFilters['verified'])
-            }
-            aria-label={t('user.verification')}
-            className="w-auto min-w-[130px]"
-          >
-            <option value="ALL">{t('user.allVerification')}</option>
-            <option value="VERIFIED">{t('profile.verified')}</option>
-            <option value="UNVERIFIED">{t('profile.notVerified')}</option>
-          </NativeSelect>
-
           {isFiltered ? (
             <Button
               type="button"
@@ -197,7 +177,7 @@ export function UsersPage() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {users.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-10 text-center">
           <EmptyState
             icon={<UsersIcon className="size-8 text-muted-foreground" />}
@@ -225,7 +205,7 @@ export function UsersPage() {
           tableKey="users-table"
           rowKey="id"
           columns={columns}
-          dataSource={data?.meta ? toPagination(filtered, data.meta) : paginateLocal(filtered, page, limit)}
+          dataSource={data?.meta ? toPagination(users, data.meta) : paginateLocal(users, page, limit)}
           onParamChange={(params: Record<string, unknown>) => {
             if (typeof params.page === 'number' && params.page !== page) {
               setPage(params.page)

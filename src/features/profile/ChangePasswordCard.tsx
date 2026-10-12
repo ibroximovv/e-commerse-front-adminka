@@ -20,11 +20,11 @@ export function ChangePasswordCard() {
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  /* Backend: new_password >= 6 (ChangePasswordDto). */
+  /* Backend: new_password >= 8 (ChangePasswordDto, ADMIN only). */
   const schema = z
     .object({
       old_password: z.string().min(1, t('profile.validation.oldRequired')),
-      new_password: z.string().min(6, t('profile.validation.newMin')),
+      new_password: z.string().min(8, t('profile.validation.newMin')),
       confirm_password: z.string(),
     })
     .refine((values) => values.new_password === values.confirm_password, {
@@ -125,7 +125,7 @@ export function ChangePasswordCard() {
 
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground pt-1">
             <ShieldCheck className="size-3.5 text-emerald-500" />
-            <span>Parol kamida 6 ta belgidan iborat bo'lishi va avvalgi paroldan farq qilishi lozim.</span>
+            <span>{t('profile.passwordRules')}</span>
           </div>
 
           <div className="pt-2">

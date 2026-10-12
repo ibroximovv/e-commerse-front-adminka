@@ -104,7 +104,7 @@ export function SidebarNav({
               {user?.photo ? (
                 <img src={fileUrl(user.photo)} alt="" className="size-full object-cover" />
               ) : (
-                initials(user?.full_name, user?.email)
+                initials(user?.full_name)
               )}
             </div>
 
@@ -147,7 +147,7 @@ export function SidebarNav({
             {user?.photo ? (
               <img src={fileUrl(user.photo)} alt="" className="size-full object-cover" />
             ) : (
-              initials(user?.full_name, user?.email)
+              initials(user?.full_name)
             )}
           </button>
         </div>

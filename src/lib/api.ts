@@ -115,9 +115,25 @@ api.interceptors.response.use(
      * `message` ni MASSIV qilib qaytaradi.
      */
     const raw = error.response?.data?.message ?? error.message
-    return Promise.reject(new Error(Array.isArray(raw) ? raw.join(', ') : raw))
+    return Promise.reject(
+      new ApiError(Array.isArray(raw) ? raw.join(', ') : raw, error.response?.status),
+    )
   },
 )
+
+/**
+ * Backend translates `message` by `?ln`, so callers that need to branch on the
+ * failure kind (login: 401 vs 429) must use `status`, not the text.
+ */
+export class ApiError extends Error {
+  status?: number
+
+  constructor(message: string, status?: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
 
 // ── Yordamchilar: konvertni ochib beradi ─────────────────────────────────────
 

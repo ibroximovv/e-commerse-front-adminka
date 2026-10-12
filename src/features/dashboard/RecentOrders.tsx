@@ -31,13 +31,13 @@ export function RecentOrders({ orders }: { orders: Order[] }) {
               className="group flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
             >
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40 text-xs font-semibold text-muted-foreground">
-                {initials(order.user?.full_name, order.user?.email)}
+                {initials(order.user?.full_name)}
               </span>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate text-xs font-medium text-foreground">
-                    {order.user?.full_name || order.user?.email || t('common.none')}
+                    {order.user?.full_name || order.customer_name || t('common.none')}
                   </p>
                   <span className="font-mono text-[10px] text-muted-foreground">
                     #{shortId(order.id)}

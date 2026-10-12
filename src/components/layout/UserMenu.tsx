@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useLogout } from '@/features/auth/hooks'
 import { fileUrl } from '@/lib/api'
+import { formatPhone } from '@/lib/phone'
 import type { User } from '@/lib/types'
 import { initials } from '@/lib/utils'
 
@@ -31,7 +32,7 @@ export function UserMenu({ user }: { user?: User }) {
           <Avatar className="size-8">
             <AvatarImage src={fileUrl(user?.photo)} alt="" />
             <AvatarFallback className="bg-brand-muted text-xs font-medium text-brand">
-              {initials(user?.full_name, user?.email)}
+              {initials(user?.full_name)}
             </AvatarFallback>
           </Avatar>
         </button>
@@ -44,7 +45,7 @@ export function UserMenu({ user }: { user?: User }) {
               {user?.full_name || t('role.ADMIN')}
             </span>
             <span className="truncate text-xs text-muted-foreground">
-              {user?.email}
+              {formatPhone(user?.phone)}
             </span>
           </div>
         </DropdownMenuLabel>

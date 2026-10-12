@@ -1,19 +1,27 @@
 import { dayjs } from 'dgz-ui/utils'
+import i18n from 'i18next'
 
 export { cn } from 'dgz-ui/utils'
 export { dayjs }
 
-/** Narx — backend'da Float. Ko'rsatishda ming ajratgich bilan. */
-export function formatPrice(value: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(value)
+/**
+ * Backend returns every amount as a whole UZS integer (no tiyin), so no
+ * fraction digits. Grouping follows the UI language: "1 250 000 so'm".
+ */
+export function formatPrice(value: number): string {
+  return `${formatNumber(Math.round(value ?? 0))} ${currencyLabel()}`
+}
+
+function currencyLabel(): string {
+  const language = i18n.language
+  if (language === 'ru') return 'сум'
+  if (language === 'en') return 'UZS'
+  return "so'm"
 }
 
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-US').format(value)
+  // Space grouping for every language — 'en-US' commas look odd next to "so'm"
+  return new Intl.NumberFormat('ru-RU').format(value).replace(/\u00a0|\u202f/g, ' ')
 }
 
 export function formatDate(value?: string | null): string {

@@ -110,7 +110,7 @@ export function ProductReviewsModal({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm text-foreground">
-                      {rev.user?.full_name || rev.user?.email || 'User'}
+                      {rev.user?.full_name || t('common.none')}
                     </span>
                     {rev.is_verified_purchase && (
                       <span className="flex items-center gap-1 rounded-full bg-success-muted px-2 py-0.5 text-[10px] font-semibold text-success">
